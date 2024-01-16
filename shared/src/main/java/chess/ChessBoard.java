@@ -19,18 +19,23 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()][position.getColumn()] = piece;
+        squares[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
      * Gets a chess piece on the chessboard
      *
-     * @param position The position to get the piece from
+     * @param //Position The position to get the piece from
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()][position.getColumn()];
+        int row = position.getRow() -1;
+        int col = position.getColumn() -1;
+        if(isValidPosition(row, col)){
+            return squares[row][col];
+        }
+        else{return null;}
     }
 
     /**
@@ -39,5 +44,8 @@ public class ChessBoard {
      */
     public void resetBoard() {
         throw new RuntimeException("Not implemented");
+    }
+    private boolean isValidPosition(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 }

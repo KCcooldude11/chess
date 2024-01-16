@@ -54,8 +54,17 @@ public class ChessPiece {
             throw new IllegalArgumentException("No matching piece at that given position");
         }
         Collection<ChessMove> validMoves = new ArrayList<>();
-        validMoves.addAll(getDiagonalMoves(board, myPosition));
-        return validMoves;
+        if (pieceType == PieceType.BISHOP) {
+            validMoves.addAll(getDiagonalMoves(board, myPosition));
+            return validMoves;
+        }
+        if (pieceType == PieceType.PAWN) {
+            validMoves.addAll(getPawnMoves(board, myPosition));
+            return validMoves;
+        }
+    }
+    private Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition){
+        
     }
     private Collection<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> diagonalMoves = new ArrayList<>();
@@ -66,33 +75,40 @@ public class ChessPiece {
 
         return diagonalMoves;
     }
-    private Collection<ChessMove> getMovesInDirection(ChessBoard board, ChessPosition myPosition, int rowIncrement, int colIncrement){
+    private Collection<ChessMove> getMovesInDirection(ChessBoard board, ChessPosition myPosition, int rowIncrement, int colIncrement) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int row = myPosition.getRow() + rowIncrement;
-        int col = myPosition.getColumn() + colIncrement;
-        while (isValidPosition(row, col)){
-            ChessPosition newPosition = new ChessPosition(row, col);
-            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
 
-            if(pieceAtNewPosition == null){
-                moves.add(new ChessMove(myPosition, newPosition, null));
-                //if the position is empty (null)
-            }
-            else if(pieceAtNewPosition.getTeamColor() != this.getTeamColor()){
-                //if there is an opponnent piece to capture.
-                moves.add(new ChessMove(myPosition, newPosition, null));
-                break;
-            }
-            else{
-                //there is your own piece in that position.
-                break;
-            }
+        while (isValidPosition(row, col)) {
             row += rowIncrement;
             col += colIncrement;
+            if(isValidPosition(row,col)){
+            ChessPosition newPosition = new ChessPosition(row, col);  // Create the new position first
+
+            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+
+            if (pieceAtNewPosition == null) {
+                System.out.println("added null move");
+                moves.add(new ChessMove(myPosition, newPosition, null));
+                // if the position is empty (null)
+            } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                // if there is an opponent piece to capture.
+                System.out.println("added capture move");
+                moves.add(new ChessMove(myPosition, newPosition, null));
+                break;
+            } else {
+                System.out.println("can't move here");
+                // there is your own piece in that position.
+                break;
+            }
+            }
+            else{break;}
         }
         return moves;
     }
+
     private boolean isValidPosition(int row, int col){
-        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+        return row > 0 && row <= 8 && col > 0 && col <= 8;
     }
 }
