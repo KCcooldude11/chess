@@ -68,51 +68,65 @@ public class ChessPiece {
             validMoves.addAll(getRookMoves(board, myPosition));
             return validMoves;
         }
+        if (pieceType == PieceType.KNIGHT) {
+            validMoves.addAll(getKnightMoves(board, myPosition));
+            return validMoves;
+        }
         return validMoves;
     }
 
     //    private Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition){
 //
 //    }
-    private Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> sideMoves = new ArrayList<>();
-        sideMoves.addAll(getMovesInLine(board, myPosition, 1, 0));
-        sideMoves.addAll(getMovesInLine(board, myPosition, -1, 0));
-        sideMoves.addAll(getMovesInLine(board, myPosition, 0, 1));
-        sideMoves.addAll(getMovesInLine(board, myPosition, 0, -1));
+    private Collection<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> lMoves = new ArrayList<>();
+        lMoves.addAll(getMovesKnight(board, myPosition, 2, -1));
+        lMoves.addAll(getMovesKnight(board, myPosition, 2, 1));
+        lMoves.addAll(getMovesKnight(board, myPosition, -2, 1));
+        lMoves.addAll(getMovesKnight(board, myPosition, -2, -1));
+        lMoves.addAll(getMovesKnight(board, myPosition, 1, 2));
+        lMoves.addAll(getMovesKnight(board, myPosition, 1, -2));
+        lMoves.addAll(getMovesKnight(board, myPosition, -1, -2));
+        lMoves.addAll(getMovesKnight(board, myPosition, -1, 2));
 
-        return sideMoves;
+        return lMoves;
     }
 
-    private Collection<ChessMove> getMovesInLine(ChessBoard board, ChessPosition myPosition, int rowIncrement, int colIncrement) {
+    private Collection<ChessMove> getMovesKnight(ChessBoard board, ChessPosition myPosition, int rowIncrement, int colIncrement) {
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        while (isValidPosition(row, col)) {
-            row += rowIncrement;
-            col += colIncrement;
-            if (isValidPosition(row, col)) {
-                ChessPosition newPosition = new ChessPosition(row, col);  // Create the new position first
+        row += rowIncrement;
+        col += colIncrement;
+        if (isValidPosition(row, col)) {
+            ChessPosition newPosition = new ChessPosition(row, col);  // Create the new position first
 
-                ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
-                if (pieceAtNewPosition == null) {
-                    System.out.println("added null move");
-                    moves.add(new ChessMove(myPosition, newPosition, null));
-                    // if the position is empty (null)
-                } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
-                    // if there is an opponent piece to capture.
-                    System.out.println("added capture move");
-                    moves.add(new ChessMove(myPosition, newPosition, null));
-                    break;
-                } else {
-                    System.out.println("can't move here");
-                    // there is your own piece in that position.
-                    break;
-                }
+            if (pieceAtNewPosition == null) {
+                System.out.println("added null move");
+                moves.add(new ChessMove(myPosition, newPosition, null));
+                // if the position is empty (null)
+            } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                // if there is an opponent piece to capture.
+                System.out.println("added capture move");
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } else {
+                System.out.println("can't move here");
+                // there is your own piece in that position.
             }
         }
         return moves;
+    }
+
+    private Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> sideMoves = new ArrayList<>();
+        sideMoves.addAll(getMovesInDirection(board, myPosition, 1, 0));
+        sideMoves.addAll(getMovesInDirection(board, myPosition, -1, 0));
+        sideMoves.addAll(getMovesInDirection(board, myPosition, 0, 1));
+        sideMoves.addAll(getMovesInDirection(board, myPosition, 0, -1));
+
+        return sideMoves;
     }
 
     private Collection<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition myPosition) {
