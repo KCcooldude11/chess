@@ -95,15 +95,17 @@ public class ChessPiece {
         }
         int newRow = row + direction;
         if (isValidPosition(newRow, col) && board.getPiece(new ChessPosition(newRow, col)) == null) {
-            pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));\
-
+            pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
+            //promotion needs implementation
             if (newRow == 8 || newRow == 1) {
-                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.QUEEN));
+
             }
         }
+
+
         if ((row == 2 && teamColor == ChessGame.TeamColor.WHITE) || (row == 7 && teamColor == ChessGame.TeamColor.BLACK)) {
-            int doubleRow = row + 2;
-            if (isValidPosition(doubleRow, col) && board.getPiece(new ChessPosition(doubleRow, col)) == null) {
+            int doubleRow = row + (2 * direction);
+            if (isValidPosition(doubleRow, col) && board.getPiece(new ChessPosition(doubleRow, col)) == null && board.getPiece(new ChessPosition(newRow, col)) == null) {
                 pawnMoves.add(new ChessMove(myPosition, new ChessPosition(doubleRow, col), null));
             }
         }
@@ -288,7 +290,10 @@ public class ChessPiece {
         return Objects.hash(teamColor, pieceType);
     }
 
+    //    private boolean isValidPosition(int row, int col) {
+//        return row > 0 && row <= 8 && col > 0 && col <= 8;
+//    }
     private boolean isValidPosition(int row, int col) {
-        return row > 0 && row <= 8 && col > 0 && col <= 8;
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 }
