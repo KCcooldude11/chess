@@ -95,9 +95,16 @@ public class ChessPiece {
         }
         int newRow = row + direction;
         if (isValidPosition(newRow, col) && board.getPiece(new ChessPosition(newRow, col)) == null) {
-            pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
+//            pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
             //promotion needs implementation
             if (newRow == 8 || newRow == 1) {
+                // Add promotion moves (for example, promoting to a queen)
+                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.QUEEN));
+                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.ROOK));
+                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.KNIGHT));
+                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.BISHOP));
+            } else {
+                pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
 
             }
         }
@@ -122,6 +129,13 @@ public class ChessPiece {
 
                 if (pieceAtNewPosition != null && pieceAtNewPosition.getTeamColor() != teamColor) {
                     pawnMoves.add(new ChessMove(myPosition, capturePosition, null));
+                    if (newRow == 8 || newRow == 1) {
+                        // Add promotion moves (for example, promoting to a queen)
+                        pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.QUEEN));
+                        pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.ROOK));
+                        pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.KNIGHT));
+                        pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.BISHOP));
+                    }
                 }
             }
         }
