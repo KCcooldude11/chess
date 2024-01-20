@@ -87,16 +87,10 @@ public class ChessPiece {
         Collection<ChessMove> pawnMoves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        int direction = 0;
-        if (teamColor == ChessGame.TeamColor.WHITE) {
-            direction = 1;
-        } else {
-            direction = -1;
-        }
+        int direction = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
         int newRow = row + direction;
+
         if (isValidPosition(newRow, col) && board.getPiece(new ChessPosition(newRow, col)) == null) {
-//            pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
-            //promotion needs implementation
             if (newRow == 8 || newRow == 1) {
                 // Add promotion moves (for example, promoting to a queen)
                 pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.QUEEN));
@@ -105,10 +99,8 @@ public class ChessPiece {
                 pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), ChessPiece.PieceType.BISHOP));
             } else {
                 pawnMoves.add(new ChessMove(myPosition, new ChessPosition(newRow, col), null));
-
             }
         }
-
 
         if ((row == 2 && teamColor == ChessGame.TeamColor.WHITE) || (row == 7 && teamColor == ChessGame.TeamColor.BLACK)) {
             int doubleRow = row + (2 * direction);
@@ -119,8 +111,7 @@ public class ChessPiece {
 
         int[] captureCols = {col - 1, col + 1};
 
-        for (int i = 0; i < captureCols.length; i++) {
-            int captureCol = captureCols[i];
+        for (int captureCol : captureCols) {
             int captureRow = newRow;
 
             if (isValidPosition(captureRow, captureCol)) {
@@ -128,13 +119,14 @@ public class ChessPiece {
                 ChessPiece pieceAtNewPosition = board.getPiece(capturePosition);
 
                 if (pieceAtNewPosition != null && pieceAtNewPosition.getTeamColor() != teamColor) {
-                    pawnMoves.add(new ChessMove(myPosition, capturePosition, null));
                     if (newRow == 8 || newRow == 1) {
                         // Add promotion moves (for example, promoting to a queen)
                         pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.QUEEN));
                         pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.ROOK));
                         pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.KNIGHT));
                         pawnMoves.add(new ChessMove(myPosition, capturePosition, ChessPiece.PieceType.BISHOP));
+                    } else {
+                        pawnMoves.add(new ChessMove(myPosition, capturePosition, null));
                     }
                 }
             }
@@ -142,6 +134,7 @@ public class ChessPiece {
 
         return pawnMoves;
     }
+
 
     private Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> kingMoves = new ArrayList<>();
