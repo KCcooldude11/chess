@@ -136,7 +136,44 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
+                    for (ChessMove move : moves) {
+                        if (isMoveLegal(move, teamColor)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isMoveLegal(ChessMove move, TeamColor teamColor) {
+        // Save the original state
+        ChessPiece originalPieceAtStart = board.getPiece(move.getStartPosition());
+        ChessPiece originalPieceAtEnd = board.getPiece(move.getEndPosition());
+
+        // Make the move
+        board.addPiece(move.getEndPosition(), originalPieceAtStart); // Move the piece to the new position
+        board.addPiece(move.getStartPosition(), null); // Remove the piece from its original position
+
+        // Check if the move resolves the check
+        boolean isStillInCheck = isInCheck(teamColor);
+
+        // Undo the move to revert to the original state
+        board.addPiece(move.getStartPosition(), originalPieceAtStart);
+        board.addPiece(move.getEndPosition(), originalPieceAtEnd);
+
+        return !isStillInCheck;
     }
 
     /**
