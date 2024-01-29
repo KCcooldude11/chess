@@ -72,6 +72,21 @@ public class ChessGame {
 
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
         if (validMoves != null && validMoves.contains(move)) {
+            if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                if ((piece.getTeamColor() == TeamColor.WHITE && move.getEndPosition().getRow() == 8) ||
+                        (piece.getTeamColor() == TeamColor.BLACK && move.getEndPosition().getRow() == 1)) {
+
+                    // Promote the pawn
+                    ChessPiece.PieceType promotionType = move.getPromotionPiece();
+                    if (promotionType != null && promotionType != ChessPiece.PieceType.PAWN) {
+                        piece = new ChessPiece(piece.getTeamColor(), promotionType);
+                    } else {
+                        throw new InvalidMoveException("Invalid promotion type.");
+                    }
+                }
+            }
+
+
             board.addPiece(move.getEndPosition(), piece);
             board.addPiece(move.getStartPosition(), null);
             toggleTurn();
