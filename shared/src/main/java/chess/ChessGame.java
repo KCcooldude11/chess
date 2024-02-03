@@ -88,7 +88,6 @@ public class ChessGame {
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                 if ((piece.getTeamColor() == TeamColor.WHITE && move.getEndPosition().getRow() == 8) ||
                         (piece.getTeamColor() == TeamColor.BLACK && move.getEndPosition().getRow() == 1)) {
-
                     // Promote the pawn
                     ChessPiece.PieceType promotionType = move.getPromotionPiece();
                     if (promotionType != null && promotionType != ChessPiece.PieceType.PAWN) {
@@ -190,30 +189,37 @@ public class ChessGame {
         ChessPiece originalPieceAtStart = board.getPiece(move.getStartPosition());
         ChessPiece originalPieceAtEnd = board.getPiece(move.getEndPosition());
 
+        System.out.println("Attempting move from " + move.getStartPosition().toString() + " to " + move.getEndPosition().toString());
+
         ChessPosition kingPositionBefore = findKingPosition(teamColor);
-        System.out.println("King's position before move: " + kingPositionBefore.getRow() + "," + kingPositionBefore.getColumn());
+        if (kingPositionBefore == null) {
+            System.out.println("ERROR: King position before move is null for team " + teamColor);
+        } else {
+            System.out.println("King's position before move for team " + teamColor + ": " + kingPositionBefore.getRow() + "," + kingPositionBefore.getColumn());
+        }
 
         // Make the move
         board.addPiece(move.getEndPosition(), originalPieceAtStart); // Move the piece to the new position
-        board.addPiece(move.getStartPosition(), null); // Remove the piece from its original position
+        board.removePiece(move.getStartPosition()); // Remove the piece from its original position
 
         ChessPosition kingPositionAfter = findKingPosition(teamColor);
-        System.out.println("King's position after move: " + kingPositionAfter.getRow() + "," + kingPositionAfter.getColumn());
+        if (kingPositionAfter == null) {
+            System.out.println("ERROR: King position after move is null for team " + teamColor);
+        } else {
+            System.out.println("King's position after move for team " + teamColor + ": " + kingPositionAfter.getRow() + "," + kingPositionAfter.getColumn());
+        }
 
-        // Check if the move resolves the check
-        boolean isStillInCheck = isInCheck(teamColor);
-        System.out.println("Does the move result in check? " + isStillInCheck);
-
+        // Check if the move puts or leaves the king in check
+        boolean isInCheckAfterMove = isInCheck(teamColor);
+        System.out.println("Is " + teamColor + " in check after the move? " + isInCheckAfterMove);
 
         // Undo the move to revert to the original state
         board.addPiece(move.getStartPosition(), originalPieceAtStart);
         board.addPiece(move.getEndPosition(), originalPieceAtEnd);
 
-        System.out.println("Checking move legality: " + move.getStartPosition().getRow() + "," + move.getStartPosition().getColumn() + " to " + move.getEndPosition().getRow() + "," + move.getEndPosition().getColumn());
-        System.out.println("Is move legal? " + !isStillInCheck);
-
-        return !isStillInCheck;
+        return !isInCheckAfterMove;
     }
+
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
