@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -55,7 +56,16 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
-        return piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> allMoves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> legalMoves = new ArrayList<>();
+
+        for (ChessMove move : allMoves) {
+            if (isMoveLegal(move, piece.getTeamColor())) {
+                legalMoves.add(move);
+            }
+        }
+
+        return legalMoves;
     }
 
     /**
@@ -180,16 +190,27 @@ public class ChessGame {
         ChessPiece originalPieceAtStart = board.getPiece(move.getStartPosition());
         ChessPiece originalPieceAtEnd = board.getPiece(move.getEndPosition());
 
+        ChessPosition kingPositionBefore = findKingPosition(teamColor);
+        System.out.println("King's position before move: " + kingPositionBefore.getRow() + "," + kingPositionBefore.getColumn());
+
         // Make the move
         board.addPiece(move.getEndPosition(), originalPieceAtStart); // Move the piece to the new position
         board.addPiece(move.getStartPosition(), null); // Remove the piece from its original position
 
+        ChessPosition kingPositionAfter = findKingPosition(teamColor);
+        System.out.println("King's position after move: " + kingPositionAfter.getRow() + "," + kingPositionAfter.getColumn());
+
         // Check if the move resolves the check
         boolean isStillInCheck = isInCheck(teamColor);
+        System.out.println("Does the move result in check? " + isStillInCheck);
+
 
         // Undo the move to revert to the original state
         board.addPiece(move.getStartPosition(), originalPieceAtStart);
         board.addPiece(move.getEndPosition(), originalPieceAtEnd);
+
+        System.out.println("Checking move legality: " + move.getStartPosition().getRow() + "," + move.getStartPosition().getColumn() + " to " + move.getEndPosition().getRow() + "," + move.getEndPosition().getColumn());
+        System.out.println("Is move legal? " + !isStillInCheck);
 
         return !isStillInCheck;
     }
@@ -243,5 +264,18 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.deepEquals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn);
     }
 }
