@@ -161,15 +161,12 @@ public class ChessPiece {
             ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
             if (pieceAtNewPosition == null) {
-                System.out.println("added null move");
                 moves.add(new ChessMove(myPosition, newPosition, null));
                 // if the position is empty (null)
             } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
                 // if there is an opponent piece to capture.
-                System.out.println("added capture move");
                 moves.add(new ChessMove(myPosition, newPosition, null));
             } else {
-                System.out.println("can't move here");
                 // there is your own piece in that position.
             }
         }
@@ -215,12 +212,10 @@ public class ChessPiece {
             ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
             if (pieceAtNewPosition == null) {
-                System.out.println("added null move");
                 moves.add(new ChessMove(myPosition, newPosition, null));
                 // if the position is empty (null)
             } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
                 // if there is an opponent piece to capture.
-                System.out.println("added capture move");
                 moves.add(new ChessMove(myPosition, newPosition, null));
             } else {
                 System.out.println("can't move here");
@@ -232,14 +227,10 @@ public class ChessPiece {
 
     private Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> sideMoves = new ArrayList<>();
-//        System.out.println("Rook at: " + myPosition.getRow() + "," + myPosition.getColumn());
         sideMoves.addAll(getMovesInDirection(board, myPosition, 1, 0));
         sideMoves.addAll(getMovesInDirection(board, myPosition, -1, 0));
         sideMoves.addAll(getMovesInDirection(board, myPosition, 0, 1));
         sideMoves.addAll(getMovesInDirection(board, myPosition, 0, -1));
-//        for (ChessMove move : sideMoves) {
-//            System.out.println("Rook move: " + move.getStartPosition().getRow() + "," + move.getStartPosition().getColumn() + " to " + move.getEndPosition().getRow() + "," + move.getEndPosition().getColumn());
-//        }
         return sideMoves;
     }
     //test stuff
@@ -271,10 +262,10 @@ public class ChessPiece {
             ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
             if (pieceAtNewPosition == null) {
-                moves.add(new ChessMove(myPosition, newPosition, null)); // Empty space, can move
+                moves.add(new ChessMove(myPosition, newPosition, null)); // Empty space
             } else {
                 if (pieceAtNewPosition.getTeamColor() != this.teamColor) {
-                    moves.add(new ChessMove(myPosition, newPosition, null)); // Can capture enemy piece
+                    moves.add(new ChessMove(myPosition, newPosition, null)); // Can capture
                 }
                 break; // Blocked by a piece, can't move further
             }
@@ -296,9 +287,6 @@ public class ChessPiece {
         return Objects.hash(teamColor, pieceType);
     }
 
-    //    private boolean isValidPosition(int row, int col) {
-//        return row > 0 && row <= 8 && col > 0 && col <= 8;
-//    }
     private boolean isValidPosition(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }

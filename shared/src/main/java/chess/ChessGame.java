@@ -88,7 +88,7 @@ public class ChessGame {
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                 if ((piece.getTeamColor() == TeamColor.WHITE && move.getEndPosition().getRow() == 8) ||
                         (piece.getTeamColor() == TeamColor.BLACK && move.getEndPosition().getRow() == 1)) {
-                    // Promote the pawn
+                    // Pawn Promotion
                     ChessPiece.PieceType promotionType = move.getPromotionPiece();
                     if (promotionType != null && promotionType != ChessPiece.PieceType.PAWN) {
                         piece = new ChessPiece(piece.getTeamColor(), promotionType);
@@ -209,11 +209,8 @@ public class ChessGame {
             System.out.println("King's position after move for team " + teamColor + ": " + kingPositionAfter.getRow() + "," + kingPositionAfter.getColumn());
         }
 
-        // Check if the move puts or leaves the king in check
-        boolean isInCheckAfterMove = isInCheck(teamColor);
-        System.out.println("Is " + teamColor + " in check after the move? " + isInCheckAfterMove);
 
-        // Undo the move to revert to the original state
+        boolean isInCheckAfterMove = isInCheck(teamColor);
         board.addPiece(move.getStartPosition(), originalPieceAtStart);
         board.addPiece(move.getEndPosition(), originalPieceAtEnd);
 
