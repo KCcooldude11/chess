@@ -189,13 +189,10 @@ public class ChessGame {
         ChessPiece originalPieceAtStart = board.getPiece(move.getStartPosition());
         ChessPiece originalPieceAtEnd = board.getPiece(move.getEndPosition());
 
-        System.out.println("Attempting move from " + move.getStartPosition().toString() + " to " + move.getEndPosition().toString());
 
         ChessPosition kingPositionBefore = findKingPosition(teamColor);
         if (kingPositionBefore == null) {
-            System.out.println("ERROR: King position before move is null for team " + teamColor);
         } else {
-            System.out.println("King's position before move for team " + teamColor + ": " + kingPositionBefore.getRow() + "," + kingPositionBefore.getColumn());
         }
 
         // Make the move
@@ -204,9 +201,7 @@ public class ChessGame {
 
         ChessPosition kingPositionAfter = findKingPosition(teamColor);
         if (kingPositionAfter == null) {
-            System.out.println("ERROR: King position after move is null for team " + teamColor);
         } else {
-            System.out.println("King's position after move for team " + teamColor + ": " + kingPositionAfter.getRow() + "," + kingPositionAfter.getColumn());
         }
 
 

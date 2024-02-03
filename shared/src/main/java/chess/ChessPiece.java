@@ -218,7 +218,6 @@ public class ChessPiece {
                 // if there is an opponent piece to capture.
                 moves.add(new ChessMove(myPosition, newPosition, null));
             } else {
-                System.out.println("can't move here");
                 // there is your own piece in that position.
             }
         }
