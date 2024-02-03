@@ -242,6 +242,7 @@ public class ChessPiece {
 //        }
         return sideMoves;
     }
+    //test stuff
 
     private Collection<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> diagonalMoves = new ArrayList<>();

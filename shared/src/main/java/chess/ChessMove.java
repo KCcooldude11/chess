@@ -12,6 +12,7 @@ public class ChessMove {
     private ChessPosition startPos;
     private ChessPosition endPos;
     private ChessPiece.PieceType promoPiece;
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.startPos = startPosition;
@@ -43,6 +44,7 @@ public class ChessMove {
         return promoPiece;
     }
 
+    //testing promotion piece
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
