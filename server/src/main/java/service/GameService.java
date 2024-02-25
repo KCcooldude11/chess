@@ -1,38 +1,28 @@
 package service;
 
-import dataAccess.DataAccessException;
 import dataAccess.IGameDAO;
-import dataAccess.GameDAO;
 import model.GameData;
-import chess.ChessGame;
+
+import java.util.List;
 
 public class GameService {
-    private IGameDAO gameDAO;
+    private IGameDAO gameDAO; // Assume this is initialized elsewhere
 
-    public GameService() {
-        this.gameDAO = new GameDAO(); // In a real scenario, consider dependency injection.
+    public List<GameData> listGames() throws ServiceException {
+        return gameDAO.getGames();
     }
 
-    public GameData createGame(String gameName, String username) throws ServiceException {
-        try {
-            // Validation: Ensure game name and username are provided
-            if (gameName == null || username == null) {
-                throw new ServiceException("Game name or username is missing.");
-            }
+    public int createGame(String username, String gameName) throws ServiceException {
+        int gameId = gameDAO.createGame(new GameData(username, gameName));
+        return gameId;
+    }
 
-            // Create a new ChessGame instance to manage the game state
-            ChessGame newChessGame = new ChessGame();
-
-            // Create a GameData object for persistence
-            GameData newGame = new GameData(0, username, null, gameName, newChessGame);
-
-            // Persist the new game
-            gameDAO.insertGame(newGame);
-
-            return newGame;
-
-        } catch (DataAccessException e) {
-            throw new ServiceException("Failed to create a new game.", e);
+    public void joinGame(String username, int gameID, String playerColor) throws ServiceException {
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new ServiceException("Game not found.");
         }
+        // Simplified: Assuming a method to add a player to a game
+        gameDAO.addPlayerToGame(username, gameID, playerColor);
     }
 }

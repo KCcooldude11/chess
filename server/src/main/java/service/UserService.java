@@ -1,48 +1,37 @@
 package service;
 
-import dataAccess.DataAccessException;
 import dataAccess.IUserDAO;
-import dataAccess.UserDAO;
-import model.AuthData;
 import model.UserData;
+import model.AuthData;
 
 public class UserService {
-    private IUserDAO userDAO;
+    private IUserDAO userDAO; // Assume this is initialized elsewhere, e.g., constructor
 
-    public UserService() {
-        this.userDAO = new UserDAO(); // In a real scenario, consider dependency injection.
+    public AuthData register(String username, String password, String email) throws ServiceException {
+        // Check if user exists
+        if (userDAO.getUser(username) != null) {
+            throw new ServiceException("User already exists.");
+        }
+        // Create user
+        userDAO.createUser(new UserData(username, password, email));
+        // Create auth token
+        String authToken = generateAuthToken(username);
+        userDAO.createAuth(new AuthData(authToken, username));
+        return new AuthData(authToken, username);
     }
 
-    public AuthData registerUser(UserData newUser) throws ServiceException {
-        try {
-            // Basic validation
-            if (newUser.getUsername() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
-                throw new ServiceException("Registration data is incomplete.");
-            }
-
-            // Check if user already exists
-            try {
-                if (userDAO.getUser(newUser.getUsername()) != null) {
-                    throw new ServiceException("Username already taken.");
-                }
-            } catch (DataAccessException e) {
-                // User does not exist, proceed
-            }
-
-            // Insert the new user
-            userDAO.insertUser(newUser);
-
-            // Generate authentication token for the new user (simplified for this example)
-            String authToken = generateAuthToken(newUser.getUsername());
-            return new AuthData(authToken, newUser.getUsername());
-
-        } catch (DataAccessException e) {
-            throw new ServiceException("Failed to register the user.", e);
+    public AuthData login(String username, String password) throws ServiceException {
+        UserData user = userDAO.getUser(username);
+        if (user == null || !user.getPassword().equals(password)) {
+            throw new ServiceException("Invalid username or password.");
         }
+        String authToken = generateAuthToken(username);
+        userDAO.createAuth(new AuthData(authToken, username));
+        return new AuthData(authToken, username);
     }
 
     private String generateAuthToken(String username) {
-        // Placeholder: generate a real token in a real application
-        return "authTokenFor-" + username;
+        // Implementation to generate a unique authToken
+        return "authTokenFor-" + username; // Simplified for illustration
     }
 }
