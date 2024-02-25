@@ -24,6 +24,10 @@ public class GameDAO implements IGameDAO {
         }
         return games.get(gameID);
     }
+    public List<GameData> listAllGames() throws DataAccessException {
+        // Implementation to return a list of all games
+        return new ArrayList<>(games.values());
+    }
 
     // Assume these method signatures exist in IGameDAO
 

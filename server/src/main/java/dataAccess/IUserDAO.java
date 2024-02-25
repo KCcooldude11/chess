@@ -13,4 +13,6 @@ public interface IUserDAO {
     void deleteAuth(String authToken) throws DataAccessException;
 
     void clearUsers() throws DataAccessException;
+    boolean validateAuth(String authToken) throws DataAccessException; // New method signature
+
 }

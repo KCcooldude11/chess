@@ -36,5 +36,6 @@ public class AuthDAO implements IAuthDAO {
     @Override
     public void clearAuthTokens() throws DataAccessException {
         authTokensToUsernames.clear();
+        usernamesToAuthTokens.clear();
     }
 }

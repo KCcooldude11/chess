@@ -9,6 +9,20 @@ public class AuthData {
         this.username = username;
     }
 
-    // Getters and Setters
-    // Implement getters and setters here
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    // Optionally, you can include setters if your application requires modifying these properties.
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
