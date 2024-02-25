@@ -41,4 +41,8 @@ public class GameDAO implements IGameDAO {
         // Logic to add player to game, based on color or as an observer
         // This is very simplified and would need to be fleshed out based on your game logic
     }
+    @Override
+    public void clearGames() throws DataAccessException {
+        games.clear();
+    }
 }

@@ -11,4 +11,6 @@ public interface IUserDAO {
 
     // Method to delete an authentication token
     void deleteAuth(String authToken) throws DataAccessException;
+
+    void clearUsers() throws DataAccessException;
 }

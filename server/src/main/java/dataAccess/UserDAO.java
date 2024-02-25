@@ -45,4 +45,8 @@ public class UserDAO implements IUserDAO {
 
         authTokens.remove(userKey);
     }
+    @Override
+    public void clearUsers() throws DataAccessException {
+        users.clear(); // Assuming 'users' is the Map storing user data
+    }
 }

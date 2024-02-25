@@ -1,6 +1,7 @@
 package service;
 
 import dataAccess.IGameDAO;
+import dataAccess.DataAccessException;
 import model.GameData;
 
 import java.util.List;
@@ -8,21 +9,35 @@ import java.util.List;
 public class GameService {
     private IGameDAO gameDAO; // Assume this is initialized elsewhere
 
+    public GameService(IGameDAO gameDAO) {
+        this.gameDAO = gameDAO;
+    }
+
     public List<GameData> listGames() throws ServiceException {
-        return gameDAO.getGames();
-    }
-
-    public int createGame(String username, String gameName) throws ServiceException {
-        int gameId = gameDAO.createGame(new GameData(username, gameName));
-        return gameId;
-    }
-
-    public void joinGame(String username, int gameID, String playerColor) throws ServiceException {
-        GameData game = gameDAO.getGame(gameID);
-        if (game == null) {
-            throw new ServiceException("Game not found.");
+        try {
+            return gameDAO.getGames(); // Assuming getGames() returns a List<GameData>
+        } catch (DataAccessException e) {
+            throw new ServiceException("Failed to list games", e);
         }
-        // Simplified: Assuming a method to add a player to a game
-        gameDAO.addPlayerToGame(username, gameID, playerColor);
+    }
+
+    public int createGame(String authToken, String gameName) throws ServiceException {
+        try {
+            // Assuming validateAuth method returns a username associated with the authToken
+            String username = validateAuth(authToken);
+            GameData game = new GameData(0, username, null, gameName, null); // Adjust based on your GameData constructor
+            gameDAO.insertGame(game);
+            return game.getGameID(); // Assuming GameData has a getGameID() method
+        } catch (DataAccessException e) {
+            throw new ServiceException("Failed to create a new game.", e);
+        }
+    }
+
+    // Add other methods as needed...
+
+    // Placeholder method for auth token validation
+    private String validateAuth(String authToken) throws DataAccessException {
+        // Implement your actual authentication validation logic here
+        return "username"; // Placeholder return
     }
 }

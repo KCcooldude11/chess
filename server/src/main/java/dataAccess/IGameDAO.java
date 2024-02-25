@@ -12,4 +12,5 @@ public interface IGameDAO {
 
     // Method to add a player to a game
     void addPlayerToGame(String username, int gameID, String playerColor) throws DataAccessException;
+    void clearGames() throws DataAccessException;
 }
