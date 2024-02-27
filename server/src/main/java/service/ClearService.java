@@ -1,30 +1,21 @@
 package service;
 
-import dataAccess.IUserDAO;
-import dataAccess.IGameDAO;
-import dataAccess.IAuthDAO;
-
-import dataAccess.DataAccessException;
+import dataAccess.*;
 
 public class ClearService {
-    private IUserDAO userDAO;
-    private IGameDAO gameDAO;
-    private IAuthDAO authDAO;
 
-    // Constructor injection is used for simplicity
-    public ClearService(IUserDAO userDAO, IGameDAO gameDAO, IAuthDAO authDAO) {
+    private final IUserDAO userDAO;
+    private final IAuthDAO authDAO;
+    private final IGameDAO gameDAO;
+
+    public ClearService(IUserDAO userDAO, IAuthDAO authDAO, IGameDAO gameDAO) {
         this.userDAO = userDAO;
-        this.gameDAO = gameDAO;
         this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
     }
-
-    public void clearAllData() throws ServiceException {
-        try {
-            userDAO.clearUsers();
-            authDAO.clearAuthTokens();
-            gameDAO.clearGames();
-        } catch (DataAccessException e) {
-            throw new ServiceException("Failed to clear all data", e);
-        }
+    public void clearAll() throws DataAccessException {
+        userDAO.clearAllUsers();
+        authDAO.clearAuthTokens();
+        gameDAO.ClearAllGames();
     }
 }

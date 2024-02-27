@@ -1,65 +1,186 @@
 package server;
 
-import service.ClearService;
-import spark.Spark;
-import service.UserService;
-import service.GameService;
-import dataAccess.UserDAO; // Import the UserDAO
-import dataAccess.GameDAO; // Import the GameDAO
-import dataAccess.IUserDAO; // Import the IUserDAO interface
-import dataAccess.IGameDAO; // Import the IGameDAO interface
-import dataAccess.IAuthDAO;
-import dataAccess.AuthDAO;
-import server.AdminHandler;
-import server.UserHandler;
-import server.GameHandler;
+
+import dataAccess.*;
+import service.*;
+import spark.*;
+import model.request.*;
+import model.end.ErrorMessage;
+import java.util.Objects;
+import com.google.gson.Gson;
 
 public class Server {
+    private IUserDAO userDAO;
+    private IAuthDAO authDAO;
+    private IGameDAO gameDAO;
 
     public int run(int desiredPort) {
+        userDAO = new UserDAO();
+        authDAO = new AuthDAO();
+        gameDAO = new GameDAO();
+
         Spark.port(desiredPort);
+
         Spark.staticFiles.location("web");
-
-        // Instantiate DAO implementations
-        IUserDAO userDAO = new UserDAO();
-        IGameDAO gameDAO = new GameDAO();
-        IAuthDAO authDAO = new AuthDAO(); // Instantiate AuthDAO
-
-        // Initialize services with DAOs
-        UserService userService = new UserService(userDAO, authDAO);
-        GameService gameService = new GameService(gameDAO, authDAO); // Pass both DAOs to GameService
-        ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
-
-        // Initialize handlers with their services
-        UserHandler userHandler = new UserHandler(userService);
-        GameHandler gameHandler = new GameHandler(gameService);
-        AdminHandler adminHandler = new AdminHandler(clearService); // Initialize AdminHandler with ClearService
-
-
-        // Register your endpoints
-        userHandler.initializeRoutes();
-        gameHandler.initializeRoutes();
-        adminHandler.setupRoutes();
-
-        // Handle exceptions here if you have global error handling
-        //not sure if this is needed
-        Spark.exception(Exception.class, (exception, request, response) -> {
-            exception.printStackTrace(); // Print the stack trace for debugging
-            response.status(500); // Set HTTP status to 500 (Internal Server Error)
-            response.body("Internal server error"); // Set the response body
-        });
+        //post
+        Spark.post("/user", this::registerHandler);
+        Spark.post("/session", this::loginHandler);
+        Spark.post("/game", this::createGameHandler);
+        //put
+        Spark.put("/game", this::joinGameHandler);
+        //get
+        Spark.get("/game", this::listGamesHandler);
+        //delete
+        Spark.delete("/session", this::logoutHandler);
+        Spark.delete("/db", this::deleteHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
     }
-
+    private Object registerHandler(Request request, Response response) {
+        UserService userService = new UserService(userDAO, authDAO);
+        try {
+            var thisReq = new Gson().fromJson(request.body(), RegisterReq.class);
+            var thisRes = userService.register(thisReq);
+            return new Gson().toJson(thisRes);
+        }
+        catch(DataAccessException e) {
+            if(Objects.equals(e.getMessage(), "User already exists")) {
+                response.status(403);
+                return new Gson().toJson(new ErrorMessage("Error: already taken"));
+            }
+            if(Objects.equals(e.getMessage(), "Bad request")) {
+                response.status(400);
+                return new Gson().toJson(new ErrorMessage("Error: bad request"));
+            }
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage("Error: DataAccessException thrown but not caught correctly"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object loginHandler(Request request, Response response) {
+        UserService userService = new UserService(userDAO, authDAO);
+        try {
+            var thisReq = new Gson().fromJson(request.body(), LoginReq.class);
+            var thisRes = userService.login(thisReq);
+            return new Gson().toJson(thisRes);
+        }
+        catch(DataAccessException e) {
+            response.status(401);
+            return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object createGameHandler(Request request, Response response) {
+        GameService gameService = new GameService(gameDAO, authDAO);
+        try {
+            String authToken = request.headers("authorization");
+            var thisReq = new Gson().fromJson(request.body(), CreateGameReq.class);
+            var thisRes = gameService.createGame(thisReq, authToken);
+            return new Gson().toJson(thisRes);
+        }
+        catch(DataAccessException e) {
+            if(Objects.equals(e.getMessage(), "Bad request")) {
+                response.status(400);
+                return new Gson().toJson(new ErrorMessage("Error: bad request"));
+            }
+            if(Objects.equals(e.getMessage(), "Unauthorized")) {
+                response.status(401);
+                return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
+            }
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage("Error: DataAccessException thrown but not caught correctly"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object joinGameHandler(Request request, Response response) {
+        GameService gameService = new GameService(gameDAO, authDAO);
+        try {
+            String authToken = request.headers("authorization");
+            var thisReq = new Gson().fromJson(request.body(), JoinGameReq.class);
+            gameService.joinGame(thisReq, authToken);
+            return "";
+        }
+        catch(DataAccessException e) {
+            if(Objects.equals(e.getMessage(), "Unauthorized")) {
+                response.status(401);
+                return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
+            }
+            if(Objects.equals(e.getMessage(), "Bad request")) {
+                response.status(400);
+                return new Gson().toJson(new ErrorMessage("Error: bad request"));
+            }
+            if(Objects.equals(e.getMessage(), "Already taken")) {
+                response.status(403);
+                return new Gson().toJson(new ErrorMessage("Error: already taken"));
+            }
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage("Error: DataAccessException thrown but not caught correctly"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object listGamesHandler(Request request, Response response) {
+        GameService gameService = new GameService(gameDAO, authDAO);
+        try {
+            ListGamesReq req = new ListGamesReq(request.headers("authorization"));
+            var thisRes = gameService.listGames(req);
+            return new Gson().toJson(thisRes);
+        }
+        catch(DataAccessException e) {
+            response.status(401);
+            return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object logoutHandler(Request request, Response response) {
+        UserService userService = new UserService(userDAO, authDAO);
+        try {
+            LogoutReq thisReq = new LogoutReq(request.headers("authorization"));
+            userService.logout(thisReq);
+            return "";
+        }
+        catch(DataAccessException e) {
+            response.status(401);
+            return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
+        }
+        catch(Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
+    }
+    private Object deleteHandler(Request request, Response response) {
+        ClearService ClearService = new ClearService(userDAO, authDAO, gameDAO);
+        try {
+            ClearService.clearAll();
+        }
+        catch (Exception e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.toString()));
+        }
+        return "";
+    }
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
     }
     public static void main(String[] args) {
         Server server = new Server();
-        int port = 8080; // Or any other port you wish to use
+        int port = 8080;
         server.run(port);
         System.out.println("Server running on port: " + port);
     }
