@@ -1,6 +1,7 @@
 package server;
 
 import model.AuthData;
+import util.MessageResponse;
 import model.UserData;
 import service.UserService;
 import service.ServiceException;
@@ -17,22 +18,19 @@ public class UserHandler {
         // Register route
         spark.Spark.post("/user", "application/json", (request, response) -> {
             UserData newUser = JsonUtil.fromJson(request.body(), UserData.class);
-
-            // Validation for null values
-            if (newUser.getUsername() == null || newUser.getUsername().trim().isEmpty() ||
-                    newUser.getPassword() == null || newUser.getPassword().trim().isEmpty() ||
-                    newUser.getEmail() == null || newUser.getEmail().trim().isEmpty()) {
-                response.status(400); // Bad Request
-                return JsonUtil.toJson(new ErrorMessage("Username, password, and email are required"));
-            }
-
             try {
+                // Check if user already exists
+                if (userService.userExists(newUser.getUsername())) {
+                    response.status(403); // Forbidden
+                    return JsonUtil.toJson(new ErrorMessage("Error: User already exists."));
+                }
+
                 AuthData authData = userService.register(newUser.getUsername(), newUser.getPassword(), newUser.getEmail());
                 response.status(200);
                 return JsonUtil.toJson(authData);
             } catch (ServiceException e) {
-                response.status(400); // Here, you might want to differentiate between different types of errors
-                return JsonUtil.toJson(new ErrorMessage("Registration failed: " + e.getMessage()));
+                response.status(400);
+                return JsonUtil.toJson(new ErrorMessage("Error: " + e.getMessage()));
             }
         });
 
@@ -56,10 +54,12 @@ public class UserHandler {
             try {
                 userService.logout(authToken);
                 res.status(200); // HTTP 200 OK
-                return "User logged out successfully.";
+                res.type("application/json"); // Ensure the response content-type is set to application/json
+                return JsonUtil.toJson(new MessageResponse("User logged out successfully."));
             } catch (ServiceException e) {
                 res.status(401); // HTTP 401 Unauthorized
-                return "Failed to log out: " + e.getMessage();
+                res.type("application/json");
+                return JsonUtil.toJson(new ErrorMessage("Error: " + e.getMessage()));
             }
         });
     }

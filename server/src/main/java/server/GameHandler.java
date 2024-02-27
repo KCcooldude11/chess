@@ -16,26 +16,31 @@ public class GameHandler {
 
     public void initializeRoutes() {
         // Create game route
+        // Create game route
         spark.Spark.post("/game", "application/json", (request, response) -> {
             System.out.println("Request Body: " + request.body()); // Print the request body to console for debugging
-
+            String authToken = request.headers("Authorization");
             GameData gameData = JsonUtil.fromJson(request.body(), GameData.class);
+            String gameName = gameData.getGameName();
 
             // Validate game name before proceeding
-            if (gameData.getGameName() == null || gameData.getGameName().trim().isEmpty()) {
+            if (gameName == null || gameName.trim().isEmpty()) {
                 response.status(400); // Bad Request
                 return JsonUtil.toJson(new ErrorMessage("Game name is required"));
             }
 
-            // Assuming createGame method returns a GameData object or similar
+            // Assuming createGame method now returns a GameData object
             try {
+                GameData newGame = gameService.createGame(authToken, gameName);
                 response.status(200); // Set the status accordingly
-                return JsonUtil.toJson(gameService.createGame(gameData.getGameName(), gameData.getWhiteUsername()));
+                response.type("application/json");
+                return JsonUtil.toJson(newGame);
             } catch (ServiceException e) {
                 response.status(500); // Internal Server Error
                 return JsonUtil.toJson(new ErrorMessage("Failed to create game: " + e.getMessage()));
             }
         });
+
 
         // List games route
         spark.Spark.get("/game", "application/json", (request, response) -> {

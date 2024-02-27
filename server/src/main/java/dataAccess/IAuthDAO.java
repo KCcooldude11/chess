@@ -11,4 +11,6 @@ public interface IAuthDAO {
     void deleteAuthToken(String authToken) throws DataAccessException;
 
     void clearAuthTokens() throws DataAccessException;
+
+    public void deleteAuthTokenForUser(String username) throws DataAccessException;
 }

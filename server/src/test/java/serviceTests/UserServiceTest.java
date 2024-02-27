@@ -3,6 +3,7 @@ package serviceTests;
 import dataAccess.DataAccessException;
 import dataAccess.IUserDAO;
 import dataAccess.UserDAO;
+import dataAccess.IAuthDAO;
 import model.UserData;
 import service.UserService;
 import service.ServiceException;
@@ -16,12 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     private IUserDAO userDAO;
+    private IAuthDAO authDAO;
     private UserService userService;
 
     @BeforeEach
     void setUp() {
         userDAO = mock(IUserDAO.class);
-        userService = new UserService(userDAO);
+        userService = new UserService(userDAO, authDAO);
     }
 
     @Test

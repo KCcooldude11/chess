@@ -26,20 +26,33 @@ public class GameService {
     }
 
     // Example use case: Creating a game now involves validating the auth token to get a username
-    public int createGame(String authToken, String gameName) throws ServiceException {
+    public GameData createGame(String authToken, String gameName) throws ServiceException {
         try {
             // Attempt to validate the authToken and retrieve the associated username
             String username = getUsernameFromAuthToken(authToken);
+            System.out.println("createGame: Username from authToken: " + username);
+
             if (username == null || username.isEmpty()) {
                 throw new ServiceException("Authentication failed: Invalid authToken.");
             }
 
             // Proceed with game creation using the validated username
             GameData game = new GameData(0, username, null, gameName, null); // Adjust according to your GameData structure
+            System.out.println("createGame: Creating game with name: " + gameName + " for username: " + username);
+
             gameDAO.insertGame(game);
-            return game.getGameID(); // Ensure this ID is properly generated/set within insertGame
+            System.out.println("createGame: Game inserted with ID: " + game.getGameID());
+
+            return game; // Ensure this ID is properly generated/set within insertGame
         } catch (DataAccessException e) {
+            System.err.println("createGame: Failed due to DataAccessException: " + e.getMessage());
+            e.printStackTrace(); // For a more detailed stack trace
             throw new ServiceException("Failed to create game due to authentication issues.", e);
+        }
+        catch (ServiceException e) {
+            System.err.println("createGame: Failed due to ServiceException: " + e.getMessage());
+            e.printStackTrace(); // For a more detailed stack trace
+            throw e; // Re-throwing the same exception
         }
     }
 

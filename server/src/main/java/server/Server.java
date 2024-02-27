@@ -26,7 +26,7 @@ public class Server {
         IAuthDAO authDAO = new AuthDAO(); // Instantiate AuthDAO
 
         // Initialize services with DAOs
-        UserService userService = new UserService(userDAO);
+        UserService userService = new UserService(userDAO, authDAO);
         GameService gameService = new GameService(gameDAO, authDAO); // Pass both DAOs to GameService
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
 
