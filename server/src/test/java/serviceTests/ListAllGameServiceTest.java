@@ -25,7 +25,7 @@ public class ListAllGameServiceTest {
         ListGamesReq req = new ListGamesReq(authToken);
         var res = listGameService.listGames(req);
         Assertions.assertEquals(4, res.games().size());
-        listGame.ClearAllGames();
+        listGame.clearAllGames();
     }
 
     @Test
@@ -36,6 +36,6 @@ public class ListAllGameServiceTest {
         authError.createAuthToken("ExampleUsername");
         ListGamesReq req = new ListGamesReq(UUID.randomUUID().toString());
         Assertions.assertThrows(DataAccessException.class, () -> listGameService.listGames(req));
-        ListError.ClearAllGames();
+        ListError.clearAllGames();
     }
 }

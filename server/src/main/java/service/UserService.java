@@ -16,41 +16,44 @@ public class UserService {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
     }
+
     public RegisterEnd register(RegisterReq register) throws DataAccessException {
-        if(register.username() == null || register.username().isEmpty() || register.password() == null || register.password().isEmpty() || register.email() == null || register.email().isEmpty()) {
+        // Use getter methods instead of direct property access
+        if(register.getUsername() == null || register.getUsername().isEmpty() || register.getPassword() == null || register.getPassword().isEmpty() || register.getEmail() == null || register.getEmail().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
-        UserData user = userDAO.getUser(register.username());
+        UserData user = userDAO.getUser(register.getUsername());
         if(user != null) {
             throw new DataAccessException("User already exists");
         }
 
-        userDAO.createUser(register.username(), register.password(), register.email());
-        String auth = authDAO.createAuthToken(register.username());
-        return new RegisterEnd(register.username(), auth);
+        userDAO.createUser(register.getUsername(), register.getPassword(), register.getEmail());
+        String auth = authDAO.createAuthToken(register.getUsername());
+        return new RegisterEnd(register.getUsername(), auth);
     }
+
     public LoginEnd login(LoginReq req) throws DataAccessException {
-        UserData user = userDAO.getUser(req.username());
+        UserData user = userDAO.getUser(req.getUsername());
 
         if(user == null) {
             throw new DataAccessException("Unauthorized Access");
         }
 
-        if(!Objects.equals(user.password(), req.password())) {
+        if(!Objects.equals(user.getPassword(), req.getPassword())) {
             throw new DataAccessException("Unauthorized Access");
         }
 
-        String auth = authDAO.createAuthToken(req.username());
-        return new LoginEnd(req.username(), auth);
+        String auth = authDAO.createAuthToken(req.getUsername());
+        return new LoginEnd(req.getUsername(), auth);
     }
+
     public void logout(LogoutReq req) throws DataAccessException {
-        AuthData authData = authDAO.getAuthToken(req.authToken());
+        AuthData authData = authDAO.getAuthToken(req.getAuthToken());
 
         if(authData == null) {
             throw new DataAccessException("Unauthorized Access");
         }
 
-        authDAO.deleteAuthToken(req.authToken());
+        authDAO.deleteAuthToken(req.getAuthToken());
     }
-
 }

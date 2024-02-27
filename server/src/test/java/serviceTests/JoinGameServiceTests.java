@@ -22,8 +22,8 @@ public class JoinGameServiceTests {
         JoinGameReq req = new JoinGameReq("WHITE", gameID);
         gameService.joinGame(req, authToken);
         Assertions.assertEquals(new GameData(gameID, "ExampleUsername", null,
-                "Game", joinGameDAO.getGame(gameID).game()), joinGameDAO.getGame(gameID));
-        joinGameDAO.ClearAllGames();
+                "Game", joinGameDAO.getGame(gameID).getGame()), joinGameDAO.getGame(gameID));
+        joinGameDAO.clearAllGames();
     }
 
     @Test
@@ -39,6 +39,6 @@ public class JoinGameServiceTests {
         Random random = new Random();
         JoinGameReq newReq = new JoinGameReq("WHITE", random.nextInt(10000));
         Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(newReq, authToken));
-        joinGameErrorDAO.ClearAllGames();
+        joinGameErrorDAO.clearAllGames();
     }
 }

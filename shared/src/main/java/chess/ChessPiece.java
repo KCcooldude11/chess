@@ -138,64 +138,32 @@ public class ChessPiece {
 
     private Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> kingMoves = new ArrayList<>();
-        kingMoves.addAll(kingMovement(board, myPosition, 1, 0));
-        kingMoves.addAll(kingMovement(board, myPosition, 1, -1));
-        kingMoves.addAll(kingMovement(board, myPosition, 1, 1));
-        kingMoves.addAll(kingMovement(board, myPosition, 0, -1));
-        kingMoves.addAll(kingMovement(board, myPosition, 0, 1));
-        kingMoves.addAll(kingMovement(board, myPosition, -1, 0));
-        kingMoves.addAll(kingMovement(board, myPosition, -1, -1));
-        kingMoves.addAll(kingMovement(board, myPosition, -1, 1));
-        return kingMoves;
-    }
+        int[][] directions = {{1, 0}, {1, -1}, {1, 1}, {0, -1}, {0, 1}, {-1, 0}, {-1, -1}, {-1, 1}};
 
-    private Collection<ChessMove> kingMovement(ChessBoard board, ChessPosition myPosition, int rowIncrement, int colIncrement) {
-        Collection<ChessMove> moves = new ArrayList<>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        row += rowIncrement;
-        col += colIncrement;
-        if (isValidPosition(row, col)) {
-            ChessPosition newPosition = new ChessPosition(row, col);  // Create the new position first
-
-            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
-
-            if (pieceAtNewPosition == null) {
-                moves.add(new ChessMove(myPosition, newPosition, null));
-                // if the position is empty (null)
-            } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
-                // if there is an opponent piece to capture.
-                moves.add(new ChessMove(myPosition, newPosition, null));
-            } else {
-                // there is your own piece in that position.
-            }
+        for (int[] dir : directions) {
+            kingMoves.addAll(getMovesKnight(board, myPosition, dir[0], dir[1]));
         }
-        return moves;
+        return kingMoves;
     }
 
     private Collection<ChessMove> getQueenMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> queenMoves = new ArrayList<>();
-        queenMoves.addAll(getMovesInDirection(board, myPosition, 1, 1));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, 1, -1));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, -1, 1));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, -1, -1));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, 1, 0));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, -1, 0));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, 0, 1));
-        queenMoves.addAll(getMovesInDirection(board, myPosition, 0, -1));
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
+        for (int[] dir : directions) {
+            queenMoves.addAll(getMovesInDirection(board, myPosition, dir[0], dir[1]));
+        }
+
         return queenMoves;
     }
 
     private Collection<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> lMoves = new ArrayList<>();
-        lMoves.addAll(getMovesKnight(board, myPosition, 2, -1));
-        lMoves.addAll(getMovesKnight(board, myPosition, 2, 1));
-        lMoves.addAll(getMovesKnight(board, myPosition, -2, 1));
-        lMoves.addAll(getMovesKnight(board, myPosition, -2, -1));
-        lMoves.addAll(getMovesKnight(board, myPosition, 1, 2));
-        lMoves.addAll(getMovesKnight(board, myPosition, 1, -2));
-        lMoves.addAll(getMovesKnight(board, myPosition, -1, -2));
-        lMoves.addAll(getMovesKnight(board, myPosition, -1, 2));
+        int[][] moves = {{2, -1}, {2, 1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, -2}, {-1, 2}};
+
+        for (int[] move : moves) {
+            lMoves.addAll(getMovesKnight(board, myPosition, move[0], move[1]));
+        }
 
         return lMoves;
     }
@@ -225,21 +193,24 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> sideMoves = new ArrayList<>();
-        sideMoves.addAll(getMovesInDirection(board, myPosition, 1, 0));
-        sideMoves.addAll(getMovesInDirection(board, myPosition, -1, 0));
-        sideMoves.addAll(getMovesInDirection(board, myPosition, 0, 1));
-        sideMoves.addAll(getMovesInDirection(board, myPosition, 0, -1));
-        return sideMoves;
+        Collection<ChessMove> rookMoves = new ArrayList<>();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+        for (int[] dir : directions) {
+            rookMoves.addAll(getMovesInDirection(board, myPosition, dir[0], dir[1]));
+        }
+
+        return rookMoves;
     }
     //test stuff
 
     private Collection<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> diagonalMoves = new ArrayList<>();
-        diagonalMoves.addAll(getMovesInDirection(board, myPosition, 1, 1));
-        diagonalMoves.addAll(getMovesInDirection(board, myPosition, 1, -1));
-        diagonalMoves.addAll(getMovesInDirection(board, myPosition, -1, 1));
-        diagonalMoves.addAll(getMovesInDirection(board, myPosition, -1, -1));
+        int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
+        for (int[] dir : directions) {
+            diagonalMoves.addAll(getMovesInDirection(board, myPosition, dir[0], dir[1]));
+        }
 
         return diagonalMoves;
     }

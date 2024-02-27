@@ -9,6 +9,6 @@ public interface IGameDAO {
     void updateGame(GameData game);
     GameData getGame(int gameID);
     Collection<GameData> listGames();
-    void ClearAllGames();
+    void clearAllGames();
 
 }

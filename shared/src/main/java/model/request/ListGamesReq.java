@@ -1,3 +1,20 @@
 package model.request;
 
-public record ListGamesReq(String authToken) {}
+public class ListGamesReq {
+    private String authToken;
+
+    public ListGamesReq() {
+    }
+
+    public ListGamesReq(String authToken) {
+        this.authToken = authToken;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
+}

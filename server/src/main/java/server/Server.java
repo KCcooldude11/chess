@@ -164,9 +164,9 @@ public class Server {
         }
     }
     private Object deleteHandler(Request request, Response response) {
-        ClearService ClearService = new ClearService(userDAO, authDAO, gameDAO);
+        ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
         try {
-            ClearService.clearAll();
+            clearService.clearAll();
         }
         catch (Exception e) {
             response.status(500);

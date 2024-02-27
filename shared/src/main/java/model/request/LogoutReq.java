@@ -1,3 +1,20 @@
 package model.request;
 
-public record LogoutReq(String authToken) {}
+public class LogoutReq {
+    private String authToken;
+
+    public LogoutReq() {
+    }
+
+    public LogoutReq(String authToken) {
+        this.authToken = authToken;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
+}

@@ -27,10 +27,10 @@ public class GameDAO implements IGameDAO {
     }
     @Override
     public void updateGame(GameData game) {
-        gamesMap.put(game.gameID(), game);
+        gamesMap.put(game.getGameID(), game);
     }
     @Override
-    public void ClearAllGames() {
+    public void clearAllGames() {
         gamesMap.clear();
     }
 }

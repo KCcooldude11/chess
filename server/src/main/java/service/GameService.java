@@ -21,15 +21,15 @@ public class GameService {
             throw new DataAccessException("Unauthorized");
         }
 
-        if(req.gameName() == null || req.gameName().isEmpty()) {
+        if(req.getGameName() == null || req.getGameName().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
 
-        Integer gameID = gameDAO.createGame(req.gameName());
+        Integer gameID = gameDAO.createGame(req.getGameName());
         return new CreateGameEnd(gameID);
     }
     public ListGamesEnd listGames(ListGamesReq req) throws DataAccessException {
-        AuthData authData = authDAO.getAuthToken(req.authToken());
+        AuthData authData = authDAO.getAuthToken(req.getAuthToken());
 
         if(authData == null) {
             throw new DataAccessException("Unauthorized");
@@ -44,25 +44,25 @@ public class GameService {
             throw new DataAccessException("Unauthorized");
         }
 
-        GameData game = gameDAO.getGame(req.gameID());
+        GameData game = gameDAO.getGame(req.getGameID());
         if(game == null) {
             throw new DataAccessException("Bad request");
         }
 
-        if(req.playerColor() == null) {
+        if(req.getPlayerColor() == null) {
             return;
         }
 
         AuthData auth = authDAO.getAuthToken(authToken);
-        if(req.playerColor().equals("WHITE")) {
-            if(game.whiteUsername() == null) {
-                game = new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game());
+        if(req.getPlayerColor().equals("WHITE")) {
+            if(game.getWhiteUsername() == null) {
+                game = new GameData(game.getGameID(), auth.getUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
             } else {
                 throw new DataAccessException("Already taken");
             }
         } else {
-            if(game.blackUsername() == null) {
-                game = new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game());
+            if(game.getBlackUsername() == null) {
+                game = new GameData(game.getGameID(), game.getWhiteUsername(), auth.getUsername(), game.getGameName(), game.getGame());
             } else {
                 throw new DataAccessException("Already taken");
             }

@@ -16,6 +16,6 @@ public class ClearService {
     public void clearAll() throws DataAccessException {
         userDAO.clearAllUsers();
         authDAO.clearAuthTokens();
-        gameDAO.ClearAllGames();
+        gameDAO.clearAllGames();
     }
 }

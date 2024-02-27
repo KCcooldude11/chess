@@ -17,9 +17,9 @@ public class RegisterServiceTests {
         UserService userService = new UserService(userDAO, authDAO);
         RegisterReq reg = new RegisterReq("ExampleUsernameReg", "TestPasswordReg", "EmailReg");
         var res = userService.register(reg);
-        Assertions.assertEquals("ExampleUsernameReg", userDAO.getUser("ExampleUsernameReg").username());
-        Assertions.assertEquals("TestPasswordReg", userDAO.getUser("ExampleUsernameReg").password());
-        Assertions.assertEquals("EmailReg", userDAO.getUser("ExampleUsernameReg").email());
+        Assertions.assertEquals("ExampleUsernameReg", userDAO.getUser("ExampleUsernameReg").getUsername());
+        Assertions.assertEquals("TestPasswordReg", userDAO.getUser("ExampleUsernameReg").getPassword());
+        Assertions.assertEquals("EmailReg", userDAO.getUser("ExampleUsernameReg").getEmail());
         Assertions.assertEquals("ExampleUsernameReg", res.username());
         Assertions.assertNotEquals("", res.authToken());
 

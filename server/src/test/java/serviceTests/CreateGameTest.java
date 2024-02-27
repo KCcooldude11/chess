@@ -22,7 +22,7 @@ public class CreateGameTest {
         CreateGameReq req = new CreateGameReq("TempGameName");
         CreateGameEnd res = gameService.createGame(req, authToken);
         Assertions.assertNotNull(createGameDAO.getGame(res.gameID()));
-        createGameDAO.ClearAllGames();
+        createGameDAO.clearAllGames();
     }
 
     @Test
@@ -36,6 +36,6 @@ public class CreateGameTest {
         Assertions.assertThrows(DataAccessException.class, () -> gameService.createGame(req, badAuthToken));
         CreateGameReq newReq = new CreateGameReq(null);
         Assertions.assertThrows(DataAccessException.class, () -> gameService.createGame(newReq, authToken));
-        createGameErrorDAO.ClearAllGames();
+        createGameErrorDAO.clearAllGames();
     }
 }

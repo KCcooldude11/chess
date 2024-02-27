@@ -37,17 +37,6 @@ public class ChessBoard {
         return Arrays.deepHashCode(squares);
     }
 
-    public void printBoard() {
-        for (int row = 8; row >= 1; row--) {
-            for (int col = 1; col <= 8; col++) {
-                ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = getPiece(position);
-                char pieceChar = (piece != null) ? getPieceChar(piece) : ' ';
-                System.out.print(pieceChar + " | ");
-            }
-            System.out.println();
-        }
-    }
 
     private char getPieceChar(ChessPiece piece) {
         switch (piece.getPieceType()) {
