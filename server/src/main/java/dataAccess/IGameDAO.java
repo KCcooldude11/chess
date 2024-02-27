@@ -1,17 +1,14 @@
 package dataAccess;
 
 import model.GameData;
-import java.util.List;
+
+import java.util.Collection;
 
 public interface IGameDAO {
-    void insertGame(GameData game) throws DataAccessException;
-    GameData getGame(int gameID) throws DataAccessException;
+    Integer createGame(String gameName);
+    void updateGame(GameData game);
+    GameData getGame(int gameID);
+    Collection<GameData> listGames();
+    void ClearAllGames();
 
-    // Method to retrieve all games
-    List<GameData> getGames() throws DataAccessException;
-
-    // Method to add a player to a game
-    void addPlayerToGame(String username, int gameID, String playerColor) throws DataAccessException;
-    void clearGames() throws DataAccessException;
-    List<GameData> listAllGames() throws DataAccessException;
 }

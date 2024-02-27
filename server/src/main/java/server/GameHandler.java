@@ -1,13 +1,10 @@
 package server;
 
-import util.ErrorMessage;
 import service.ServiceException;
-import service.*;
-import model.JoinGameRequest;
 import service.GameService;
 import model.GameData;
 import util.JsonUtil; // Ensure you have the JsonUtil class created
-import util.MessageResponse;
+
 
 public class GameHandler {
     private final GameService gameService;
