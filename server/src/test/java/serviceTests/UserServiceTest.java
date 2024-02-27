@@ -1,12 +1,8 @@
 package serviceTests;
 
-import dataAccess.DataAccessException;
-import dataAccess.IUserDAO;
-import dataAccess.UserDAO;
-import dataAccess.IAuthDAO;
-import model.UserData;
-import service.UserService;
-import service.ServiceException;
+import dataAccess.*;
+import model.*;
+import service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +14,25 @@ class UserServiceTest {
 
     private IUserDAO userDAO;
     private IAuthDAO authDAO;
+    private IGameDAO gameDAO;
     private UserService userService;
+    private GameService gameService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataAccessException {
         userDAO = mock(IUserDAO.class);
+        authDAO = mock(IAuthDAO.class);
+        gameDAO = mock(IGameDAO.class);
         userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(gameDAO, authDAO); // Initialize GameService with mocked DAOs
+
+        when(userDAO.getUser("testUser")).thenReturn(new UserData("testUser", "testPassword", "test@example.com"));
+
+        // Mock auth token validation to return the username
+        when(authDAO.validateAuthToken(anyString())).thenReturn("testUser");
+        when(userDAO.getUser("testUser")).thenReturn(new UserData("testUser", "testPassword", "test@example.com"));
+
+
     }
 
     @Test
@@ -53,7 +62,38 @@ class UserServiceTest {
     void loginUser_Success() throws DataAccessException {
         when(userDAO.getUser("existingUser")).thenReturn(new UserData("existingUser", "password", "email@example.com"));
         assertDoesNotThrow(() -> userService.login("existingUser", "password"));
-        verify(userDAO).createAuth(anyString(), anyString());
+        verify(authDAO).createAuthToken(anyString(), anyString());
+    }
+    @Test
+    public void testLoginCreatesValidAuthToken() throws DataAccessException, ServiceException {
+        String username = "testUser";
+        String password = "testPassword";
+        // Assume userService is an instance of UserService
+        AuthData authData = userService.login(username, password);
+        assertNotNull(authData.getAuthToken(), "Auth token should not be null after login");
+        assertEquals(username, authDAO.validateAuthToken(authData.getAuthToken()), "The auth token should be valid and associated with the correct username");
+    }
+    @Test
+    public void testCreateGameWithValidToken() throws DataAccessException, ServiceException {
+        String username = "testUser";
+        String password = "testPassword";
+        AuthData authData = userService.login(username, password);
+        String gameName = "ChessMatch";
+        // Assume gameService is an instance of GameService
+        GameData gameData = gameService.createGame(authData.getAuthToken(), gameName);
+        assertNotNull(gameData, "Game creation should return a valid GameData object");
+        assertEquals(username, gameData.getWhiteUsername(), "The game should be associated with the user who created it");
+    }
+    @Test
+    public void testLogoutInvalidatesAuthToken() throws DataAccessException, ServiceException {
+        String authToken = "testAuthToken";
+        doNothing().when(authDAO).deleteAuthToken(authToken);
+
+        // Action
+        userService.logout(authToken);
+
+        // Verify
+        verify(authDAO).deleteAuthToken(authToken);
     }
 }
 

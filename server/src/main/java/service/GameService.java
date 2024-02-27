@@ -63,16 +63,30 @@ public class GameService {
             throw new ServiceException("Error fetching list of games", e);
         }
     }
-    public void joinGame(String authToken, int gameID, String playerColor) throws ServiceException {
+    public void joinGame(String authToken, int gameID, String playerColor) throws ServiceException, TeamColorUnavailableException, DataAccessException {
         // Validate authToken and get username
-        String username = getUsernameFromAuthToken(authToken); // Method to validate token and extract username
+        String username = getUsernameFromAuthToken(authToken); // Existing logic
 
-        // Logic to add player to the game, e.g., using IGameDAO's addPlayerToGame method
-        try {
-            gameDAO.addPlayerToGame(username, gameID, playerColor);
-        } catch (DataAccessException e) {
-            throw new ServiceException("Failed to join game", e);
+        // Check if color is available
+        boolean colorAvailable = checkColorAvailability(gameID, playerColor);
+        if (!colorAvailable) {
+            throw new TeamColorUnavailableException("Team color already taken.");
+        }
+
+        gameDAO.addPlayerToGame(username, gameID, playerColor);
+    }
+    public boolean checkColorAvailability(int gameID, String playerColor) throws DataAccessException {
+        GameData game = gameDAO.getGame(gameID); // Assume this method exists and retrieves the game data
+
+        // Check if the color is already taken
+        if (playerColor.equalsIgnoreCase("WHITE")) {
+            return game.getWhiteUsername() == null; // Color is available if no white player is set
+        } else if (playerColor.equalsIgnoreCase("BLACK")) {
+            return game.getBlackUsername() == null; // Color is available if no black player is set
+        } else {
+            throw new IllegalArgumentException("Invalid player color: " + playerColor);
         }
     }
+
 
 }

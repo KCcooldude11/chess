@@ -2,10 +2,12 @@ package server;
 
 import util.ErrorMessage;
 import service.ServiceException;
+import service.*;
 import model.JoinGameRequest;
 import service.GameService;
 import model.GameData;
 import util.JsonUtil; // Ensure you have the JsonUtil class created
+import util.MessageResponse;
 
 public class GameHandler {
     private final GameService gameService;
@@ -54,13 +56,17 @@ public class GameHandler {
             JoinGameRequest joinRequest = JsonUtil.fromJson(request.body(), JoinGameRequest.class);
 
             try {
+                boolean isColorAvailable = gameService.checkColorAvailability(joinRequest.getGameID(), joinRequest.getPlayerColor());
+                if (!isColorAvailable) {
+                    response.status(403); // Forbidden
+                    return JsonUtil.toJson(new ErrorMessage("The chosen color is already taken by another player."));
+                }
+
                 gameService.joinGame(authToken, joinRequest.getGameID(), joinRequest.getPlayerColor());
                 response.status(200); // OK
-                response.type("application/json");
-                return JsonUtil.toJson("Joined game successfully");
+                return JsonUtil.toJson(new ErrorMessage("Joined game successfully"));
             } catch (ServiceException e) {
                 response.status(400); // Bad request or other appropriate status
-                response.type("application/json");
                 return JsonUtil.toJson(new ErrorMessage(e.getMessage()));
             }
         });

@@ -52,10 +52,8 @@ public class UserService {
             if (user == null || !user.getPassword().equals(password)) {
                 throw new ServiceException("Invalid username or password.");
             }
-            authDAO.deleteAuthTokenForUser(username);
-
             String authToken = generateAuthToken(username);
-            userDAO.createAuth(username, authToken);
+            authDAO.createAuthToken(username, authToken);
             System.out.println("Login successful for username: " + username + ", Auth Token: " + authToken);
             return new AuthData(authToken, username);
         } catch (DataAccessException e) {
@@ -84,14 +82,4 @@ public class UserService {
         // Implement token generation logic
         return UUID.randomUUID().toString(); // Example using UUID
     }
-    public boolean validateAuthToken(String authToken) throws ServiceException {
-        try {
-            // Validate the authToken
-            return userDAO.validateAuth(authToken); // Assuming a method to validate auth tokens exists in IUserDAO
-        } catch (DataAccessException e) {
-            throw new ServiceException("Failed to validate auth token.", e);
-        }
-    }
-
-    // Add other UserService methods as necessary...
 }
