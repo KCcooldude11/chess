@@ -101,8 +101,6 @@ public class ChessBoard {
 
         placeQueens(1, ChessGame.TeamColor.WHITE);
         placeQueens(8, ChessGame.TeamColor.BLACK);
-
-        printBoard();
     }
 
     private void placePawns(int row, ChessGame.TeamColor teamColor) {
