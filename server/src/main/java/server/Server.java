@@ -1,5 +1,6 @@
 package server;
 
+import service.ClearService;
 import spark.Spark;
 import service.UserService;
 import service.GameService;
@@ -9,6 +10,7 @@ import dataAccess.IUserDAO; // Import the IUserDAO interface
 import dataAccess.IGameDAO; // Import the IGameDAO interface
 import dataAccess.IAuthDAO;
 import dataAccess.AuthDAO;
+import server.AdminHandler;
 import server.UserHandler;
 import server.GameHandler;
 
@@ -26,14 +28,18 @@ public class Server {
         // Initialize services with DAOs
         UserService userService = new UserService(userDAO);
         GameService gameService = new GameService(gameDAO, authDAO); // Pass both DAOs to GameService
+        ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
 
         // Initialize handlers with their services
         UserHandler userHandler = new UserHandler(userService);
         GameHandler gameHandler = new GameHandler(gameService);
+        AdminHandler adminHandler = new AdminHandler(clearService); // Initialize AdminHandler with ClearService
+
 
         // Register your endpoints
         userHandler.initializeRoutes();
         gameHandler.initializeRoutes();
+        adminHandler.setupRoutes();
 
         // Handle exceptions here if you have global error handling
         //not sure if this is needed
@@ -50,5 +56,11 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+    public static void main(String[] args) {
+        Server server = new Server();
+        int port = 8080; // Or any other port you wish to use
+        server.run(port);
+        System.out.println("Server running on port: " + port);
     }
 }

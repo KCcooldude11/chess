@@ -1,30 +1,72 @@
 package server;
 
-import com.google.gson.Gson;
+import util.ErrorMessage;
+import service.ServiceException;
+import model.JoinGameRequest;
 import service.GameService;
 import model.GameData;
-import spark.ResponseTransformer;
+import util.JsonUtil; // Ensure you have the JsonUtil class created
 
 public class GameHandler {
     private final GameService gameService;
-    private final Gson gson;
 
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
-        this.gson = new Gson();
     }
 
     public void initializeRoutes() {
         // Create game route
-        spark.Spark.post("/game/create", "application/json", (request, response) -> {
-            // Assuming the body contains gameName and creatorUsername
-            GameData gameData = gson.fromJson(request.body(), GameData.class);
-            return gameService.createGame(gameData.getGameName(), gameData.getWhiteUsername());
-        }, gson::toJson);
+        spark.Spark.post("/game", "application/json", (request, response) -> {
+            System.out.println("Request Body: " + request.body()); // Print the request body to console for debugging
 
-        // List games route (assuming a method exists in GameService)
-        spark.Spark.get("/game/list", "application/json", (request, response) -> {
-            return gameService.listGames();
-        }, gson::toJson);
+            GameData gameData = JsonUtil.fromJson(request.body(), GameData.class);
+
+            // Validate game name before proceeding
+            if (gameData.getGameName() == null || gameData.getGameName().trim().isEmpty()) {
+                response.status(400); // Bad Request
+                return JsonUtil.toJson(new ErrorMessage("Game name is required"));
+            }
+
+            // Assuming createGame method returns a GameData object or similar
+            try {
+                response.status(200); // Set the status accordingly
+                return JsonUtil.toJson(gameService.createGame(gameData.getGameName(), gameData.getWhiteUsername()));
+            } catch (ServiceException e) {
+                response.status(500); // Internal Server Error
+                return JsonUtil.toJson(new ErrorMessage("Failed to create game: " + e.getMessage()));
+            }
+        });
+
+        // List games route
+        spark.Spark.get("/game", "application/json", (request, response) -> {
+            response.status(200); // Set the status accordingly
+            return JsonUtil.toJson(gameService.listGames());
+        });
+
+        // Join game route
+        spark.Spark.put("/game", "application/json", (request, response) -> {
+            String authToken = request.headers("Authorization");
+            JoinGameRequest joinRequest = JsonUtil.fromJson(request.body(), JoinGameRequest.class);
+
+            try {
+                gameService.joinGame(authToken, joinRequest.getGameID(), joinRequest.getPlayerColor());
+                response.status(200); // OK
+                response.type("application/json");
+                return JsonUtil.toJson("Joined game successfully");
+            } catch (ServiceException e) {
+                response.status(400); // Bad request or other appropriate status
+                response.type("application/json");
+                return JsonUtil.toJson(new ErrorMessage(e.getMessage()));
+            }
+        });
+    }
+
+    // Assuming an ErrorMessage class exists to format error messages
+    private class ErrorMessage {
+        String message;
+
+        public ErrorMessage(String message) {
+            this.message = message;
+        }
     }
 }

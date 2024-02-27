@@ -45,6 +45,7 @@ public class UserService {
             }
             String authToken = generateAuthToken(username);
             userDAO.createAuth(username, authToken);
+            System.out.println("Login successful for username: " + username + ", Auth Token: " + authToken);
             return new AuthData(authToken, username);
         } catch (DataAccessException e) {
             throw new ServiceException("Failed to log in.", e);

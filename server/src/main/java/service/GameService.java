@@ -28,20 +28,38 @@ public class GameService {
     // Example use case: Creating a game now involves validating the auth token to get a username
     public int createGame(String authToken, String gameName) throws ServiceException {
         try {
-            String username = getUsernameFromAuthToken(authToken); // Validate auth token and get username
-            GameData game = new GameData(0, username, null, gameName, null); // Adjust based on your GameData constructor
+            // Attempt to validate the authToken and retrieve the associated username
+            String username = getUsernameFromAuthToken(authToken);
+            if (username == null || username.isEmpty()) {
+                throw new ServiceException("Authentication failed: Invalid authToken.");
+            }
+
+            // Proceed with game creation using the validated username
+            GameData game = new GameData(0, username, null, gameName, null); // Adjust according to your GameData structure
             gameDAO.insertGame(game);
-            return game.getGameID();
+            return game.getGameID(); // Ensure this ID is properly generated/set within insertGame
         } catch (DataAccessException e) {
-            throw new ServiceException("Failed to create a new game.", e);
+            throw new ServiceException("Failed to create game due to authentication issues.", e);
         }
     }
 
     public List<GameData> listGames() throws ServiceException {
         try {
-            return gameDAO.listAllGames(); // Assuming there's a method listAllGames() in your IGameDAO
+            return gameDAO.listAllGames();
         } catch (DataAccessException e) {
             throw new ServiceException("Error fetching list of games", e);
         }
     }
+    public void joinGame(String authToken, int gameID, String playerColor) throws ServiceException {
+        // Validate authToken and get username
+        String username = getUsernameFromAuthToken(authToken); // Method to validate token and extract username
+
+        // Logic to add player to the game, e.g., using IGameDAO's addPlayerToGame method
+        try {
+            gameDAO.addPlayerToGame(username, gameID, playerColor);
+        } catch (DataAccessException e) {
+            throw new ServiceException("Failed to join game", e);
+        }
+    }
+
 }

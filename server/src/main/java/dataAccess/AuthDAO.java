@@ -11,10 +11,12 @@ public class AuthDAO implements IAuthDAO {
     @Override
     public void createAuthToken(String username, String authToken) throws DataAccessException {
         if (authTokensToUsernames.containsKey(authToken) || usernamesToAuthTokens.containsKey(username)) {
+            System.out.println("Conflict detected. AuthToken already exists or user already has a token.");
             throw new DataAccessException("AuthToken already exists or user already has a token.");
         }
         authTokensToUsernames.put(authToken, username);
         usernamesToAuthTokens.put(username, authToken);
+        System.out.println("Auth token created and associated with user: " + username);
     }
 
     @Override

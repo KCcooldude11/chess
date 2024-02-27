@@ -1,5 +1,6 @@
 package serviceTests;
 
+import dataAccess.DataAccessException;
 import dataAccess.IUserDAO;
 import dataAccess.UserDAO;
 import model.UserData;
@@ -7,47 +8,50 @@ import service.UserService;
 import service.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserServiceTest {
+class UserServiceTest {
+
     private IUserDAO userDAO;
     private UserService userService;
 
     @BeforeEach
-    public void setUp() {
-        // Use the actual UserDAO
-        userDAO = new UserDAO();
+    void setUp() {
+        userDAO = mock(IUserDAO.class);
         userService = new UserService(userDAO);
     }
 
     @Test
-    public void registerUser_Success() throws Exception {
-        // Arrange
-        UserData newUser = new UserData("user", "pass", "email@example.com");
-        // No need to mock getUser, assuming UserDAO can handle it directly
-
-        // Act
-        var result = userService.register("user", "pass", "email@example.com");
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("user", result.getUsername());
-        assertNotNull(result.getAuthToken());
+    void registerUser_UserAlreadyExists() throws DataAccessException {
+        when(userDAO.getUser("existingUser")).thenReturn(new UserData("existingUser", "password", "email@example.com"));
+        assertThrows(ServiceException.class, () -> userService.register("existingUser", "password", "email@example.com"));
     }
 
     @Test
-    public void registerUser_Failure_UserExists() {
-        // Arrange
-        // Assuming UserDAO can handle adding and checking for existing users directly
-
-        // Act
-        // First, register a user
-        assertDoesNotThrow(() -> userService.register("user", "pass", "email@example.com"));
-        // Try to register the same user again and expect a ServiceException
-        assertThrows(ServiceException.class, () -> {
-            userService.register("user", "pass", "email@example.com");
-        });
+    void loginUser_IncorrectPassword() throws DataAccessException {
+        when(userDAO.getUser("user")).thenReturn(new UserData("user", "correctPassword", "email@example.com"));
+        assertThrows(ServiceException.class, () -> userService.login("user", "incorrectPassword"));
     }
 
+    @Test
+    void loginUser_NonexistentUser() throws DataAccessException {
+        when(userDAO.getUser("nonexistentUser")).thenReturn(null);
+        assertThrows(ServiceException.class, () -> userService.login("nonexistentUser", "password"));
+    }
+    @Test
+    void registerUser_Success() throws DataAccessException {
+        when(userDAO.getUser("newUser")).thenReturn(null);
+        assertDoesNotThrow(() -> userService.register("newUser", "password", "email@example.com"));
+        verify(userDAO).insertUser(any(UserData.class));
+    }
+    @Test
+    void loginUser_Success() throws DataAccessException {
+        when(userDAO.getUser("existingUser")).thenReturn(new UserData("existingUser", "password", "email@example.com"));
+        assertDoesNotThrow(() -> userService.login("existingUser", "password"));
+        verify(userDAO).createAuth(anyString(), anyString());
+    }
 }
+

@@ -20,8 +20,9 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        System.out.println("Retrieving user from database: " + username);
         if (!users.containsKey(username)) {
-            throw new DataAccessException("User does not exist.");
+            return null;
         }
         return users.get(username);
     }

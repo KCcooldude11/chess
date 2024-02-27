@@ -17,6 +17,7 @@ public class GameDAO implements IGameDAO {
         games.put(game.getGameID(), game);
     }
 
+
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         if (!games.containsKey(gameID)) {
@@ -36,15 +37,36 @@ public class GameDAO implements IGameDAO {
         return new ArrayList<>(games.values());
     }
 
+    public void updateGame(GameData updatedGame) throws DataAccessException {
+        if (!games.containsKey(updatedGame.getGameID())) {
+            throw new DataAccessException("Attempted to update a non-existent game.");
+        }
+        games.put(updatedGame.getGameID(), updatedGame);
+    }
+
     // Adds a player to a game; simplified for this example
+    @Override
     public void addPlayerToGame(String username, int gameID, String playerColor) throws DataAccessException {
         GameData game = games.get(gameID);
         if (game == null) {
             throw new DataAccessException("Game not found.");
         }
-        // Logic to add player to game, based on color or as an observer
-        // This is very simplified and would need to be fleshed out based on your game logic
+
+        // Example logic for setting player based on color
+        if ("WHITE".equalsIgnoreCase(playerColor) && game.getWhiteUsername() == null) {
+            game.setWhiteUsername(username);
+        } else if ("BLACK".equalsIgnoreCase(playerColor) && game.getBlackUsername() == null) {
+            game.setBlackUsername(username);
+        } else {
+            // Handle observers or error out if the color is taken or invalid
+            throw new DataAccessException("Player color already taken or invalid.");
+        }
+
+        // Save the updated game
+        updateGame(game);
     }
+
+
     @Override
     public void clearGames() throws DataAccessException {
         games.clear();
