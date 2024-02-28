@@ -25,17 +25,19 @@ public class ListAllGameServiceTest {
     }
 
     @Test
-    void ensureGamesAreListedCorrectly() throws DataAccessException {
-        String userToken = authDAO.createAuthToken("GamerUser");
-        for (int i = 1; i <= 4; i++) {
-            gameDAO.createGame("Game" + i);
-        }
-
-        ListGames listRequest = new ListGames(userToken);
-        var listResult = gameServ.listGames(listRequest);
-        Assertions.assertEquals(4, listResult.games().size(), "Should list exactly 4 games.");
-
-        gameDAO.clearAllGames();
+    void listGamesServiceSuccess() throws DataAccessException {
+        GameDAO listGame = new GameDAO();
+        AuthDAO listAuthDAO = new AuthDAO();
+        GameService listGameService = new GameService(listGame, listAuthDAO);
+        String authToken = listAuthDAO.createAuthToken("ExampleUsername");
+        listGame.createGame("Game1");
+        listGame.createGame("Game2");
+        listGame.createGame("Game3");
+        listGame.createGame("Game4");
+        ListGames req = new ListGames(authToken);
+        var res = listGameService.listGames(req);
+        Assertions.assertEquals(4, res.games().size());
+        listGame.clearAllGames();
     }
 
     @Test
