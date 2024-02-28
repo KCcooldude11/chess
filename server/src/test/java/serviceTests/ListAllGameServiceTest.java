@@ -5,24 +5,12 @@ import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import model.request.ListGames;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
 
 import java.util.UUID;
 
 public class ListAllGameServiceTest {
-
-    private GameDAO gameDAO;
-    private AuthDAO authDAO;
-    private GameService gameServ;
-
-    @BeforeEach
-    void setup() throws DataAccessException {
-        gameDAO = new GameDAO();
-        authDAO = new AuthDAO();
-        gameServ = new GameService(gameDAO, authDAO);
-    }
 
     @Test
     void listGamesServiceSuccess() throws DataAccessException {
@@ -41,12 +29,13 @@ public class ListAllGameServiceTest {
     }
 
     @Test
-    void handleUnauthorizedGameListing() {
-        String invalidToken = UUID.randomUUID().toString();
-        ListGames listRequest = new ListGames(invalidToken);
-
-        Assertions.assertThrows(DataAccessException.class, () -> gameServ.listGames(listRequest), "Unauthorized access should throw an exception.");
-
-        authDAO.clearAuthTokens();
+    void listGamesServiceErrors() {
+        GameDAO ListError = new GameDAO();
+        AuthDAO authError = new AuthDAO();
+        GameService listGameService = new GameService(ListError, authError);
+        authError.createAuthToken("ExampleUsername");
+        ListGames req = new ListGames(UUID.randomUUID().toString());
+        Assertions.assertThrows(DataAccessException.class, () -> listGameService.listGames(req));
+        ListError.clearAllGames();
     }
 }
