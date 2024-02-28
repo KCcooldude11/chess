@@ -1,10 +1,10 @@
 package model.request;
 
-public class LoginReq {
+public class Login {
     private String username;
     private String password;
 
-    public LoginReq(String username, String password) {
+    public Login(String username, String password) {
         this.username = username;
         this.password = password;
     }

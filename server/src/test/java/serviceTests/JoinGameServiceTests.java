@@ -1,44 +1,54 @@
 package serviceTests;
 
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
-import model.GameData;
-import model.request.JoinGameReq;
-import org.junit.jupiter.api.Assertions;
+import dataAccess.*;
+import model.request.JoinGame;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Random;
 
 public class JoinGameServiceTests {
-    @Test
-    void joinGameServiceSuccess() throws DataAccessException {
-        GameDAO joinGameDAO = new GameDAO();
-        AuthDAO joinAuthDAO = new AuthDAO();
-        GameService gameService = new GameService(joinGameDAO, joinAuthDAO);
-        String authToken = joinAuthDAO.createAuthToken("ExampleUsername");
-        int gameID = joinGameDAO.createGame("Game");
-        JoinGameReq req = new JoinGameReq("WHITE", gameID);
-        gameService.joinGame(req, authToken);
-        Assertions.assertEquals(new GameData(gameID, "ExampleUsername", null,
-                "Game", joinGameDAO.getGame(gameID).getGame()), joinGameDAO.getGame(gameID));
-        joinGameDAO.clearAllGames();
+
+    private GameDAO gameDAO;
+    private AuthDAO authDAO;
+    private GameService gameService;
+
+    @BeforeEach
+    void setup() throws DataAccessException {
+        gameDAO = new GameDAO();
+        authDAO = new AuthDAO();
+        gameService = new GameService(gameDAO, authDAO);
     }
 
     @Test
-    void joinGameServiceErrors() throws DataAccessException {
-        GameDAO joinGameErrorDAO = new GameDAO();
-        AuthDAO joinAuthErrorDAO = new AuthDAO();
-        GameService gameService = new GameService(joinGameErrorDAO, joinAuthErrorDAO);
-        String authToken = joinAuthErrorDAO.createAuthToken("ExampleUsername");
-        int gameID = joinGameErrorDAO.createGame("Game");
-        JoinGameReq req = new JoinGameReq("WHITE", gameID);
-        gameService.joinGame(req, authToken);
-        Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(req, authToken));
-        Random random = new Random();
-        JoinGameReq newReq = new JoinGameReq("WHITE", random.nextInt(10000));
-        Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(newReq, authToken));
-        joinGameErrorDAO.clearAllGames();
+    void verifySuccessfulGameJoining() throws DataAccessException {
+        String userToken = authDAO.createAuthToken("UniqueUser");
+        int uniqueGameID = gameDAO.createGame("UniqueGame");
+        JoinGame joinRequest = new JoinGame("WHITE", uniqueGameID);
+
+        gameService.joinGame(joinRequest, userToken);
+
+        Assertions.assertTrue(gameDAO.getGame(uniqueGameID).getWhiteUsername().equals("UniqueUser"), "Game joining should correctly assign user to the WHITE role.");
+
+        gameDAO.clearAllGames();
+    }
+
+    @Test
+    void handleErrorsWhenJoiningGame() throws DataAccessException {
+        String userAuthToken = authDAO.createAuthToken("PlayerOne");
+        int gameIdentity = gameDAO.createGame("ChallengeGame");
+        JoinGame initialJoinRequest = new JoinGame("WHITE", gameIdentity);
+
+        gameService.joinGame(initialJoinRequest, userAuthToken);
+
+        Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(initialJoinRequest, userAuthToken), "Joining a game with an already occupied role should not be allowed.");
+
+        int nonExistentGameID = new Random().nextInt(10000) + 10000;
+        JoinGame invalidGameRequest = new JoinGame("BLACK", nonExistentGameID);
+        Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(invalidGameRequest, userAuthToken), "Joining a non-existent game should not be allowed.");
+
+        gameDAO.clearAllGames();
     }
 }

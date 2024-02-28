@@ -1,9 +1,9 @@
 package model.request;
 
-public class ListGamesReq {
+public class ListGames {
     private String authToken;
 
-    public ListGamesReq(String authToken) {
+    public ListGames(String authToken) {
         this.authToken = authToken;
     }
 

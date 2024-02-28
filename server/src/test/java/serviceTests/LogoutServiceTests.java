@@ -1,38 +1,48 @@
 package serviceTests;
 
+import java.util.UUID;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
-import model.end.LoginEnd;
-import model.request.LoginReq;
+import model.AuthData;
+import model.request.Logout;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.UserService;
 
 public class LogoutServiceTests {
-    @Test
-    void loginServiceSuccess() throws DataAccessException {
-        UserDAO userDAO = new UserDAO();
-        AuthDAO authDAO = new AuthDAO();
-        UserService userService = new UserService(userDAO, authDAO);
-        userDAO.createUser("ExampleUsername", "TestPassword", "Test@Email");
-        LoginReq reg = new LoginReq("ExampleUsername", "TestPassword");
-        var res = userService.login(reg);
-        Assertions.assertEquals("ExampleUsername", res.username());
-        Assertions.assertEquals(LoginEnd.class, res.getClass());
-        Assertions.assertNotEquals("", res.authToken());
-        Assertions.assertNotEquals(null, res.authToken());
+
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
+    private UserService thisUserDAO;
+
+    @BeforeEach
+    void setup() {
+        userDAO = new UserDAO();
+        authDAO = new AuthDAO();
+        thisUserDAO = new UserService(userDAO, authDAO);
     }
 
     @Test
-    void loginServiceErrors() {
-        UserDAO userDAO = new UserDAO();
-        AuthDAO authDAO = new AuthDAO();
-        UserService userService = new UserService(userDAO, authDAO);
-        userDAO.createUser("ExampleUsername", "TestPassword", "Email");
-        LoginReq reg = new LoginReq("ExampleUsername", "TestWrongPassword");
-        Assertions.assertThrows(DataAccessException.class, () -> userService.login(reg));
-        LoginReq newReg = new LoginReq("TestWrongUsername", "TestPassword");
-        Assertions.assertThrows(DataAccessException.class, () -> userService.login(newReg));
+    void successfulLogout() throws DataAccessException {
+        String username = "UserForLogout";
+        userDAO.createUser(username, "password123", "user@logout.test");
+        String authToken = authDAO.createAuthToken(username);
+
+        Logout logoutRequest = new Logout(authToken);
+        thisUserDAO.logout(logoutRequest);
+
+        AuthData authDataPostLogout = authDAO.getAuthToken(authToken);
+        Assertions.assertNull(authDataPostLogout, "AuthToken should be null after logout.");
+
+    }
+
+    @Test
+    void logoutWithInvalidToken() {
+        String fakeAuthToken = UUID.randomUUID().toString();
+
+        Logout logoutRequest = new Logout(fakeAuthToken);
+        Assertions.assertThrows(DataAccessException.class, () -> thisUserDAO.logout(logoutRequest), "Logging out with an invalid authToken should throw an exception.");
     }
 }

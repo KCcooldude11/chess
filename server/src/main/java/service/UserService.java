@@ -17,8 +17,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public RegisterEnd register(RegisterReq register) throws DataAccessException {
-        // Use getter methods instead of direct property access
+    public RegisterEnd register(Register register) throws DataAccessException {
         if(register.getUsername() == null || register.getUsername().isEmpty() || register.getPassword() == null || register.getPassword().isEmpty() || register.getEmail() == null || register.getEmail().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
@@ -32,7 +31,7 @@ public class UserService {
         return new RegisterEnd(register.getUsername(), auth);
     }
 
-    public LoginEnd login(LoginReq req) throws DataAccessException {
+    public LoginEnd login(Login req) throws DataAccessException {
         UserData user = userDAO.getUser(req.getUsername());
 
         if(user == null) {
@@ -47,7 +46,7 @@ public class UserService {
         return new LoginEnd(req.getUsername(), auth);
     }
 
-    public void logout(LogoutReq req) throws DataAccessException {
+    public void logout(Logout req) throws DataAccessException {
         AuthData authData = authDAO.getAuthToken(req.getAuthToken());
 
         if(authData == null) {

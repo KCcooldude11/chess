@@ -1,13 +1,13 @@
 package model.request;
 
-public class JoinGameReq {
+public class JoinGame {
     private String playerColor;
     private int gameID;
 
-    public JoinGameReq() {
+    public JoinGame() {
     }
 
-    public JoinGameReq(String playerColor, int gameID) {
+    public JoinGame(String playerColor, int gameID) {
         this.playerColor = playerColor;
         this.gameID = gameID;
     }

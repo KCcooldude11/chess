@@ -1,11 +1,11 @@
 package model.request;
 
-public class RegisterReq {
+public class Register {
     private String username;
     private String password;
     private String email;
 
-    public RegisterReq(String username, String password, String email) {
+    public Register(String username, String password, String email) {
         this.username = username;
         this.password = password;
         this.email = email;

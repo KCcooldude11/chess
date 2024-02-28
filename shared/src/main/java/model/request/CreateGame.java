@@ -1,11 +1,11 @@
 package model.request;
 
-public class CreateGameReq {
+public class CreateGame {
     private String gameName;
 
     // Gson requires a no-arg constructor for deserialization
 
-    public CreateGameReq(String gameName) {
+    public CreateGame(String gameName) {
         this.gameName = gameName;
     }
 

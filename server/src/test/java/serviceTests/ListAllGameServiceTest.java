@@ -3,8 +3,9 @@ package serviceTests;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
-import model.request.ListGamesReq;
+import model.request.ListGames;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
 
@@ -12,30 +13,38 @@ import java.util.UUID;
 
 public class ListAllGameServiceTest {
 
-    @Test
-    void listGamesServiceSuccess() throws DataAccessException {
-        GameDAO listGame = new GameDAO();
-        AuthDAO listAuthDAO = new AuthDAO();
-        GameService listGameService = new GameService(listGame, listAuthDAO);
-        String authToken = listAuthDAO.createAuthToken("ExampleUsername");
-        listGame.createGame("Game1");
-        listGame.createGame("Game2");
-        listGame.createGame("Game3");
-        listGame.createGame("Game4");
-        ListGamesReq req = new ListGamesReq(authToken);
-        var res = listGameService.listGames(req);
-        Assertions.assertEquals(4, res.games().size());
-        listGame.clearAllGames();
+    private GameDAO gameDAO;
+    private AuthDAO authDAO;
+    private GameService gameServ;
+
+    @BeforeEach
+    void setup() throws DataAccessException {
+        gameDAO = new GameDAO();
+        authDAO = new AuthDAO();
+        gameServ = new GameService(gameDAO, authDAO);
     }
 
     @Test
-    void listGamesServiceErrors() {
-        GameDAO ListError = new GameDAO();
-        AuthDAO authError = new AuthDAO();
-        GameService listGameService = new GameService(ListError, authError);
-        authError.createAuthToken("ExampleUsername");
-        ListGamesReq req = new ListGamesReq(UUID.randomUUID().toString());
-        Assertions.assertThrows(DataAccessException.class, () -> listGameService.listGames(req));
-        ListError.clearAllGames();
+    void ensureGamesAreListedCorrectly() throws DataAccessException {
+        String userToken = authDAO.createAuthToken("GamerUser");
+        for (int i = 1; i <= 4; i++) {
+            gameDAO.createGame("Game" + i);
+        }
+
+        ListGames listRequest = new ListGames(userToken);
+        var listResult = gameServ.listGames(listRequest);
+        Assertions.assertEquals(4, listResult.games().size(), "Should list exactly 4 games.");
+
+        gameDAO.clearAllGames();
+    }
+
+    @Test
+    void handleUnauthorizedGameListing() {
+        String invalidToken = UUID.randomUUID().toString();
+        ListGames listRequest = new ListGames(invalidToken);
+
+        Assertions.assertThrows(DataAccessException.class, () -> gameServ.listGames(listRequest), "Unauthorized access should throw an exception.");
+
+        authDAO.clearAuthTokens();
     }
 }

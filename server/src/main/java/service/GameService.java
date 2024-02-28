@@ -15,7 +15,7 @@ public class GameService {
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
     }
-    public CreateGameEnd createGame(CreateGameReq req, String authToken) throws DataAccessException {
+    public CreateGameEnd createGame(CreateGame req, String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuthToken(authToken);
         if(authData == null) {
             throw new DataAccessException("Unauthorized");
@@ -28,7 +28,7 @@ public class GameService {
         Integer gameID = gameDAO.createGame(req.getGameName());
         return new CreateGameEnd(gameID);
     }
-    public ListGamesEnd listGames(ListGamesReq req) throws DataAccessException {
+    public ListGamesEnd listGames(ListGames req) throws DataAccessException {
         AuthData authData = authDAO.getAuthToken(req.getAuthToken());
 
         if(authData == null) {
@@ -37,7 +37,7 @@ public class GameService {
 
         return new ListGamesEnd(gameDAO.listGames());
     }
-    public void joinGame(JoinGameReq req, String authToken) throws DataAccessException {
+    public void joinGame(JoinGame req, String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuthToken(authToken);
 
         if(authData == null) {
@@ -57,13 +57,16 @@ public class GameService {
         if(req.getPlayerColor().equals("WHITE")) {
             if(game.getWhiteUsername() == null) {
                 game = new GameData(game.getGameID(), auth.getUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
-            } else {
+            }
+            else {
                 throw new DataAccessException("Already taken");
             }
-        } else {
+        }
+        else {
             if(game.getBlackUsername() == null) {
                 game = new GameData(game.getGameID(), game.getWhiteUsername(), auth.getUsername(), game.getGameName(), game.getGame());
-            } else {
+            }
+            else {
                 throw new DataAccessException("Already taken");
             }
         }

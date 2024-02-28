@@ -40,7 +40,7 @@ public class Server {
     private Object registerHandler(Request request, Response response) {
         UserService userService = new UserService(userDAO, authDAO);
         try {
-            var thisReq = new Gson().fromJson(request.body(), RegisterReq.class);
+            var thisReq = new Gson().fromJson(request.body(), Register.class);
             var thisRes = userService.register(thisReq);
             return new Gson().toJson(thisRes);
         }
@@ -64,7 +64,7 @@ public class Server {
     private Object loginHandler(Request request, Response response) {
         UserService userService = new UserService(userDAO, authDAO);
         try {
-            var thisReq = new Gson().fromJson(request.body(), LoginReq.class);
+            var thisReq = new Gson().fromJson(request.body(), Login.class);
             var thisRes = userService.login(thisReq);
             return new Gson().toJson(thisRes);
         }
@@ -81,7 +81,7 @@ public class Server {
         GameService gameService = new GameService(gameDAO, authDAO);
         try {
             String authToken = request.headers("authorization");
-            var thisReq = new Gson().fromJson(request.body(), CreateGameReq.class);
+            var thisReq = new Gson().fromJson(request.body(), CreateGame.class);
             var thisRes = gameService.createGame(thisReq, authToken);
             return new Gson().toJson(thisRes);
         }
@@ -106,7 +106,7 @@ public class Server {
         GameService gameService = new GameService(gameDAO, authDAO);
         try {
             String authToken = request.headers("authorization");
-            var thisReq = new Gson().fromJson(request.body(), JoinGameReq.class);
+            var thisReq = new Gson().fromJson(request.body(), JoinGame.class);
             gameService.joinGame(thisReq, authToken);
             return "";
         }
@@ -134,7 +134,7 @@ public class Server {
     private Object listGamesHandler(Request request, Response response) {
         GameService gameService = new GameService(gameDAO, authDAO);
         try {
-            ListGamesReq req = new ListGamesReq(request.headers("authorization"));
+            ListGames req = new ListGames(request.headers("authorization"));
             var thisRes = gameService.listGames(req);
             return new Gson().toJson(thisRes);
         }
@@ -150,7 +150,7 @@ public class Server {
     private Object logoutHandler(Request request, Response response) {
         UserService userService = new UserService(userDAO, authDAO);
         try {
-            LogoutReq thisReq = new LogoutReq(request.headers("authorization"));
+            Logout thisReq = new Logout(request.headers("authorization"));
             userService.logout(thisReq);
             return "";
         }
