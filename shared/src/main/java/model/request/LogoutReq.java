@@ -3,9 +3,6 @@ package model.request;
 public class LogoutReq {
     private String authToken;
 
-    public LogoutReq() {
-    }
-
     public LogoutReq(String authToken) {
         this.authToken = authToken;
     }

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class UserData {
     private String username;
     private String password;
@@ -22,4 +24,5 @@ public class UserData {
     public String getEmail() {
         return email;
     }
+
 }

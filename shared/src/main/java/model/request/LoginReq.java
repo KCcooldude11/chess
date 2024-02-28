@@ -4,9 +4,6 @@ public class LoginReq {
     private String username;
     private String password;
 
-    public LoginReq() {
-    }
-
     public LoginReq(String username, String password) {
         this.username = username;
         this.password = password;
@@ -22,9 +19,5 @@ public class LoginReq {
 
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

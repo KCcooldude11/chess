@@ -38,24 +38,6 @@ public class ChessBoard {
     }
 
 
-    private char getPieceChar(ChessPiece piece) {
-        switch (piece.getPieceType()) {
-            case KING:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'K' : 'k';
-            case QUEEN:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'Q' : 'q';
-            case BISHOP:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'B' : 'b';
-            case KNIGHT:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'N' : 'n';
-            case ROOK:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'R' : 'r';
-            case PAWN:
-                return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 'P' : 'p';
-            default:
-                throw new IllegalArgumentException("Unknown piece type");
-        }
-    }
 
     public void clearBoard() {
         for (int row = 0; row < 8; row++) {

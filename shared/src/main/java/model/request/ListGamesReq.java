@@ -3,9 +3,6 @@ package model.request;
 public class ListGamesReq {
     private String authToken;
 
-    public ListGamesReq() {
-    }
-
     public ListGamesReq(String authToken) {
         this.authToken = authToken;
     }

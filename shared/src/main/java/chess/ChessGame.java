@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.stream.IntStream;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -119,29 +120,25 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKingPosition(teamColor);
-        TeamColor opponentColor;
-        if (teamColor == TeamColor.WHITE) {
-            opponentColor = TeamColor.BLACK;
-        } else {
-            opponentColor = TeamColor.WHITE;
-        }
+        if (kingPosition == null) return false; // If no king is found, cannot be in check.
+        TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
 
-        for (int row = 1; row <= 8; row++) {
-            for (int col = 1; col <= 8; col++) {
-                ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() == opponentColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
+        // Using an enhanced for-loop for readability and direct access to board positions
+        for (ChessPosition position : ChessPosition.allPositions()) {
+            ChessPiece piece = board.getPiece(position);
+            if (piece != null && piece.getTeamColor() == opponentColor) {
+                for (ChessMove move : piece.pieceMoves(board, position)) {
+                    if (move.getEndPosition().equals(kingPosition)) {
+                        return true;
                     }
                 }
             }
         }
         return false;
     }
+
+// Assuming ChessPosition.allPositions() method returns all possible positions on a chess board.
+
 
     private ChessPosition findKingPosition(TeamColor teamColor) {
         for (int row = 1; row <= 8; row++) {
@@ -162,27 +159,28 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
+
     public boolean isInCheckmate(TeamColor teamColor) {
         if (!isInCheck(teamColor)) {
             return false;
         }
 
-        for (int row = 1; row <= 8; row++) {
-            for (int col = 1; col <= 8; col++) {
-                ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() == teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
-                    for (ChessMove move : moves) {
-                        if (isMoveLegal(move, teamColor)) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return true;
+        return IntStream.rangeClosed(1, 8).boxed()
+                .flatMap(row -> IntStream.rangeClosed(1, 8)
+                        .mapToObj(col -> new ChessPosition(row, col))
+                        .map(position -> new Object[]{position, board.getPiece(position)})
+                        .filter(objects -> {
+                            ChessPiece piece = (ChessPiece) objects[1];
+                            return piece != null && piece.getTeamColor() == teamColor;
+                        })
+                        .flatMap(objects -> {
+                            ChessPosition position = (ChessPosition) objects[0];
+                            ChessPiece piece = (ChessPiece) objects[1];
+                            return piece.pieceMoves(board, position).stream();
+                        }))
+                .noneMatch(move -> isMoveLegal(move, teamColor));
     }
+
 
     private boolean isMoveLegal(ChessMove move, TeamColor teamColor) {
         // Save the original state

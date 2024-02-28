@@ -1,5 +1,6 @@
 package chess;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -44,4 +45,15 @@ public class ChessPosition {
     public int hashCode() {
         return Objects.hash(row, col);
     }
+
+    public static List<ChessPosition> allPositions() {
+        List<ChessPosition> positions = new ArrayList<>();
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                positions.add(new ChessPosition(row, col));
+            }
+        }
+        return positions;
+    }
 }
+
