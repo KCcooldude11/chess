@@ -11,7 +11,4 @@ public class LogoutReq {
         return authToken;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-    }
 }
