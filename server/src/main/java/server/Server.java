@@ -15,27 +15,33 @@ public class Server {
     private IGameDAO gameDAO;
 
     public int run(int desiredPort) {
+        initializeDAOs();
+        configureSpark(desiredPort);
+        setupEndpoints();
+        Spark.awaitInitialization();
+        return Spark.port();
+    }
+    private void initializeDAOs() {
         userDAO = new UserDAO();
         authDAO = new AuthDAO();
         gameDAO = new GameDAO();
-
-        Spark.port(desiredPort);
-
+    }
+    private void configureSpark(int port) {
+        Spark.port(port);
         Spark.staticFiles.location("web");
-        //post
+    }
+    private void setupEndpoints() {
+        // POST requests
         Spark.post("/user", this::registerHandler);
         Spark.post("/session", this::loginHandler);
         Spark.post("/game", this::createGameHandler);
-        //put
+        // PUT requests
         Spark.put("/game", this::joinGameHandler);
-        //get
+        // GET requests
         Spark.get("/game", this::listGamesHandler);
-        //delete
+        // DELETE requests
         Spark.delete("/session", this::logoutHandler);
         Spark.delete("/db", this::deleteHandler);
-
-        Spark.awaitInitialization();
-        return Spark.port();
     }
     private Object registerHandler(Request request, Response response) {
         UserService userService = new UserService(userDAO, authDAO);
