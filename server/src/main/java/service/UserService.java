@@ -18,7 +18,9 @@ public class UserService {
     }
 
     public RegisterEnd register(Register register) throws DataAccessException {
-        if(register.getUsername() == null || register.getUsername().isEmpty() || register.getPassword() == null || register.getPassword().isEmpty() || register.getEmail() == null || register.getEmail().isEmpty()) {
+        if(register.getUsername() == null || register.getUsername().isEmpty() ||
+                register.getPassword() == null || register.getPassword().isEmpty() ||
+                register.getEmail() == null || register.getEmail().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
         UserData user = userDAO.getUser(register.getUsername());
@@ -26,24 +28,22 @@ public class UserService {
             throw new DataAccessException("User already exists");
         }
 
+        // createUser now hashes the password internally
         userDAO.createUser(register.getUsername(), register.getPassword(), register.getEmail());
-        String auth = authDAO.createAuthToken(register.getUsername());
-        return new RegisterEnd(register.getUsername(), auth);
+        String authToken = authDAO.createAuthToken(register.getUsername());
+        return new RegisterEnd(register.getUsername(), authToken);
     }
 
     public LoginEnd login(Login req) throws DataAccessException {
-        UserData user = userDAO.getUser(req.getUsername());
+        // Verify if the provided plaintext password matches the hashed password stored in the database
+        boolean isValidUser = userDAO.verifyUser(req.getUsername(), req.getPassword());
 
-        if(user == null) {
+        if(!isValidUser) {
             throw new DataAccessException("Unauthorized Access");
         }
 
-        if(!Objects.equals(user.getPassword(), req.getPassword())) {
-            throw new DataAccessException("Unauthorized Access");
-        }
-
-        String auth = authDAO.createAuthToken(req.getUsername());
-        return new LoginEnd(req.getUsername(), auth);
+        String authToken = authDAO.createAuthToken(req.getUsername());
+        return new LoginEnd(req.getUsername(), authToken);
     }
 
     public void logout(Logout req) throws DataAccessException {

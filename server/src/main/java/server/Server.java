@@ -14,16 +14,16 @@ public class Server {
     private IAuthDAO authDAO;
     private IGameDAO gameDAO;
 
-    public int run(int desiredPort) {
+    public int run(int desiredPort) throws DataAccessException {
         initializeDAOs();
         configureSpark(desiredPort);
         setupEndpoints();
         Spark.awaitInitialization();
         return Spark.port();
     }
-    private void initializeDAOs() {
-        userDAO = new UserDAO();
-        authDAO = new AuthDAO();
+    private void initializeDAOs() throws DataAccessException {
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         gameDAO = new GameDAO();
     }
     private void configureSpark(int port) {

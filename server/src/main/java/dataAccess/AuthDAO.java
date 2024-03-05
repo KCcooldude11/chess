@@ -1,30 +1,69 @@
 package dataAccess;
 
-import java.util.UUID;
-import java.util.HashMap;
 import model.AuthData;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class AuthDAO implements IAuthDAO {
-    static private final HashMap<String, AuthData> authTokens = new HashMap<>();
+    private Connection connection;
+
+    // Constructor that accepts a database connection
+    public AuthDAO(Connection connection) {
+        this.connection = connection;
+    }
+
     @Override
     public AuthData getAuthToken(String authToken) {
-        return authTokens.get(authToken);
+        String sql = "SELECT * FROM auth_tokens WHERE authToken = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, authToken);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String username = rs.getString("username");
+                return new AuthData(authToken, username);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
+
     @Override
     public String createAuthToken(String username) {
         String authToken = UUID.randomUUID().toString();
-        AuthData auth = new AuthData(authToken, username);
-        authTokens.put(authToken, auth);
-        return authToken;
+        String sql = "INSERT INTO auth_tokens (authToken, username) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, authToken);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            return authToken;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public void clearAuthTokens() {
-        authTokens.clear();
-    }
-    @Override
-    public void deleteAuthToken(String authToken) {
-        authTokens.remove(authToken);
+        String sql = "DELETE FROM auth_tokens";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    public void deleteAuthToken(String authToken) {
+        String sql = "DELETE FROM auth_tokens WHERE authToken = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, authToken);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
