@@ -67,4 +67,42 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+    public static void initializeDatabase() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password)) {
+            // Optionally, create the database if it doesn't exist.
+            // createDatabase(conn); // This would be a separate method that executes a CREATE DATABASE statement if necessary.
+
+            // Ensure the 'users' table exists.
+            try (Statement stmt = conn.createStatement()) {
+                String sqlCreateUsers =
+                        "CREATE TABLE IF NOT EXISTS users (" +
+                                "username VARCHAR(255) PRIMARY KEY, " +
+                                "password VARCHAR(255) NOT NULL, " +
+                                "email VARCHAR(255) NOT NULL UNIQUE);";
+                stmt.execute(sqlCreateUsers);
+            }
+
+            // Ensure the 'games' table exists.
+            try (Statement stmt = conn.createStatement()) {
+                String sqlCreateGames =
+                        "CREATE TABLE IF NOT EXISTS games (" +
+                                "gameID INT AUTO_INCREMENT PRIMARY KEY, " +
+                                "gameName VARCHAR(255) NOT NULL, " +
+                                "whiteUsername VARCHAR(255), " +
+                                "blackUsername VARCHAR(255), " +
+                                "gameState TEXT, " +
+                                "FOREIGN KEY (whiteUsername) REFERENCES users(username) ON DELETE SET NULL, " +
+                                "FOREIGN KEY (blackUsername) REFERENCES users(username) ON DELETE SET NULL);";
+                stmt.execute(sqlCreateGames);
+            }
+            try (Statement stmt = conn.createStatement()) {
+                String sqlCreateAuthTokens =
+                        "CREATE TABLE IF NOT EXISTS auth_tokens (" +
+                                "authToken VARCHAR(255) PRIMARY KEY, " +
+                                "username VARCHAR(255) NOT NULL, " +
+                                "FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE);";
+                stmt.execute(sqlCreateAuthTokens);
+            }
+        }
+    }
 }

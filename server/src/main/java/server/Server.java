@@ -24,7 +24,7 @@ public class Server {
     private void initializeDAOs() throws DataAccessException {
         userDAO = new UserDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
-        gameDAO = new GameDAO();
+        gameDAO = new GameDAO(DatabaseManager.getConnection());
     }
     private void configureSpark(int port) {
         Spark.port(port);

@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.request.*;
 import model.end.*;
+import chess.ChessGame;
 
 public class GameService {
 
@@ -24,8 +25,8 @@ public class GameService {
         if(req.getGameName() == null || req.getGameName().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
-
-        Integer gameID = gameDAO.createGame(req.getGameName());
+        ChessGame game = new ChessGame();
+        Integer gameID = gameDAO.createGame(req.getGameName(), game);
         return new CreateGameEnd(gameID);
     }
     public ListGamesEnd listGames(ListGames req) throws DataAccessException {

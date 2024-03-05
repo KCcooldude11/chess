@@ -28,14 +28,12 @@ public class UserService {
             throw new DataAccessException("User already exists");
         }
 
-        // createUser now hashes the password internally
         userDAO.createUser(register.getUsername(), register.getPassword(), register.getEmail());
         String authToken = authDAO.createAuthToken(register.getUsername());
         return new RegisterEnd(register.getUsername(), authToken);
     }
 
     public LoginEnd login(Login req) throws DataAccessException {
-        // Verify if the provided plaintext password matches the hashed password stored in the database
         boolean isValidUser = userDAO.verifyUser(req.getUsername(), req.getPassword());
 
         if(!isValidUser) {
