@@ -2,7 +2,7 @@ package dataAccess;
 
 import org.mindrot.jbcrypt.BCrypt;
 import model.UserData;
-import java.util.HashMap;
+
 import java.sql.*;
 
 public class UserDAO implements IUserDAO {
@@ -31,7 +31,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void createUser(String username, String password, String email) {
+    public void createUser(String username, String password, String email) throws DataAccessException {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -43,7 +43,7 @@ public class UserDAO implements IUserDAO {
             e.printStackTrace();
         }
     }
-    public boolean verifyUser(String username, String providedClearTextPassword) {
+    public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
         String sql = "SELECT password FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -59,7 +59,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void clearAllUsers() {
+    public void clearAllUsers() throws DataAccessException {
         String sql = "DELETE FROM users";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.executeUpdate();

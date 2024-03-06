@@ -2,6 +2,7 @@ package serviceTests;
 
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
+import dataAccess.DatabaseManager;
 import dataAccess.UserDAO;
 import model.request.Login;
 import model.end.LoginEnd;
@@ -18,8 +19,8 @@ public class LoginServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
-        userDAO = new UserDAO();
-        authDAO = new AuthDAO();
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisAuthService = new UserService(userDAO, authDAO);
     }
 
@@ -42,7 +43,11 @@ public class LoginServiceTests {
     void handleLoginErrors() {
         String existingUsername = "ExistingUser";
         String correctPassword = "CorrectPassword";
-        userDAO.createUser(existingUsername, correctPassword, "existinguser@example.com");
+        try {
+            userDAO.createUser(existingUsername, correctPassword, "existinguser@example.com");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         // Incorrect password attempt
         Login wrongPasswordAttempt = new Login(existingUsername, "WrongPassword");

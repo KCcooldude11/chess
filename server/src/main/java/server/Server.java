@@ -14,17 +14,23 @@ public class Server {
     private IAuthDAO authDAO;
     private IGameDAO gameDAO;
 
-    public int run(int desiredPort) throws DataAccessException {
-        initializeDAOs();
+    public int run(int desiredPort) {
+        initializeDAOs(); // Now catches DataAccessException internally
         configureSpark(desiredPort);
         setupEndpoints();
         Spark.awaitInitialization();
         return Spark.port();
     }
-    private void initializeDAOs() throws DataAccessException {
-        userDAO = new UserDAO(DatabaseManager.getConnection());
-        authDAO = new AuthDAO(DatabaseManager.getConnection());
-        gameDAO = new GameDAO(DatabaseManager.getConnection());
+    private void initializeDAOs() {
+        try {
+            this.userDAO = new UserDAO(DatabaseManager.getConnection());
+            this.authDAO = new AuthDAO(DatabaseManager.getConnection());
+            this.gameDAO = new GameDAO(DatabaseManager.getConnection());
+        } catch (DataAccessException e) {
+            System.err.println("Failed to initialize DAOs due to database access issue: " + e.getMessage());
+            // Depending on your application's requirements, you might want to stop the server or re-throw as a runtime exception.
+            throw new RuntimeException("Server initialization failed.", e);
+        }
     }
     private void configureSpark(int port) {
         Spark.port(port);

@@ -3,6 +3,7 @@ package serviceTests;
 import java.util.UUID;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
+import dataAccess.DatabaseManager;
 import dataAccess.UserDAO;
 import model.AuthData;
 import model.request.Logout;
@@ -18,9 +19,9 @@ public class LogoutServiceTests {
     private UserService thisUserDAO;
 
     @BeforeEach
-    void setup() {
-        userDAO = new UserDAO();
-        authDAO = new AuthDAO();
+    void setup() throws DataAccessException {
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisUserDAO = new UserService(userDAO, authDAO);
     }
 

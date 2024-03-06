@@ -17,8 +17,8 @@ public class JoinGameServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
-        gameDAO = new GameDAO();
-        authDAO = new AuthDAO();
+        gameDAO = new GameDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         gameService = new GameService(gameDAO, authDAO);
     }
 

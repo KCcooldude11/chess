@@ -5,7 +5,6 @@ import dataAccess.*;
 import model.end.CreateGameEnd;
 import model.request.CreateGame;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
 
@@ -18,9 +17,9 @@ public class CreateGameTest {
     private GameService gameService;
 
     @BeforeEach
-    void setUp() {
-        gameDAO = new GameDAO();
-        authDAO = new AuthDAO();
+    void setUp() throws DataAccessException {
+        gameDAO = new GameDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         gameService = new GameService(gameDAO, authDAO);
     }
 

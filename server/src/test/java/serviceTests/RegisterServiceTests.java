@@ -2,6 +2,7 @@ package serviceTests;
 
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
+import dataAccess.DatabaseManager;
 import dataAccess.UserDAO;
 import model.request.Register; // Updated to use the new Register model
 import org.junit.jupiter.api.Assertions;
@@ -16,9 +17,9 @@ public class RegisterServiceTests {
     private UserService thisUserDAO;
 
     @BeforeEach
-    void setup() {
-        userDAO = new UserDAO();
-        authDAO = new AuthDAO();
+    void setup() throws DataAccessException {
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisUserDAO = new UserService(userDAO, authDAO);
     }
 

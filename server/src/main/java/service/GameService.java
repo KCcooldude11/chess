@@ -26,7 +26,7 @@ public class GameService {
             throw new DataAccessException("Bad request");
         }
         ChessGame game = new ChessGame();
-        Integer gameID = gameDAO.createGame(req.getGameName(), game);
+        Integer gameID = gameDAO.createGame(req.getGameName());
         return new CreateGameEnd(gameID);
     }
     public ListGamesEnd listGames(ListGames req) throws DataAccessException {

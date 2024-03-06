@@ -5,7 +5,6 @@ import model.AuthData;
 import model.UserData;
 import model.request.*;
 import model.end.*;
-import java.util.Objects;
 
 public class UserService {
 

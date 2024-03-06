@@ -17,25 +17,27 @@ public class GameDAO implements IGameDAO {
     }
 
     @Override
-    public Integer createGame(String gameName, ChessGame game) {
+    public Integer createGame(String gameName) throws DataAccessException {
         String sql = "INSERT INTO games (gameName, gameState) VALUES (?, ?)";
-        String gameState = gson.toJson(game); // Serialize the ChessGame object to a JSON string
+        ChessGame defaultGameState = new ChessGame(); // Assuming ChessGame can be instantiated like this
+        String gameStateJson = gson.toJson(defaultGameState); // Serialize default or empty game state to JSON
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, gameName);
-            pstmt.setString(2, gameState);
+            pstmt.setString(2, gameStateJson);
             pstmt.executeUpdate();
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1); // Retrieve the auto-generated gameID
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Return the auto-generated gameID
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to create game: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
         String sql = "SELECT * FROM games WHERE gameID = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, gameID);
@@ -53,7 +55,7 @@ public class GameDAO implements IGameDAO {
     }
 
     @Override
-    public Collection<GameData> listGames() {
+    public Collection<GameData> listGames() throws DataAccessException {
         Collection<GameData> games = new ArrayList<>();
         String sql = "SELECT * FROM games";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -71,7 +73,7 @@ public class GameDAO implements IGameDAO {
     }
 
     @Override
-    public void updateGame(GameData game) {
+    public void updateGame(GameData game) throws DataAccessException {
         String sql = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ? WHERE gameID = ?";
         String gameState = gson.toJson(game.getGame()); // Serialize the ChessGame object to a JSON string
 
@@ -87,7 +89,7 @@ public class GameDAO implements IGameDAO {
         }
     }
     @Override
-    public void clearAllGames() {
+    public void clearAllGames() throws DataAccessException {
         String sql = "DELETE FROM games";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.executeUpdate();

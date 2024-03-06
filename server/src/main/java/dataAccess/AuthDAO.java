@@ -16,7 +16,7 @@ public class AuthDAO implements IAuthDAO {
     }
 
     @Override
-    public AuthData getAuthToken(String authToken) {
+    public AuthData getAuthToken(String authToken) throws DataAccessException {
         String sql = "SELECT * FROM auth_tokens WHERE authToken = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, authToken);
@@ -26,7 +26,7 @@ public class AuthDAO implements IAuthDAO {
                 return new AuthData(authToken, username);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to get auth token. Error: " + e.getMessage());
         }
         return null;
     }

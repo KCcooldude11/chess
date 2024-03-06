@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.ClearService;
 import org.junit.jupiter.api.Assertions;
+import chess.ChessGame;
 
 public class ClearAllServiceTests {
 
@@ -15,9 +16,9 @@ public class ClearAllServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
-        userDAO = new UserDAO();
-        authDAO = new AuthDAO();
-        gameDAO = new GameDAO();
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
+        gameDAO = new GameDAO(DatabaseManager.getConnection());
         clearService = new ClearService(userDAO, authDAO, gameDAO);
     }
 
@@ -26,8 +27,8 @@ public class ClearAllServiceTests {
         // Preliminary data setup
         userDAO.createUser("UserOne", "PasswordOne", "userone@example.com");
         String authTokenOne = authDAO.createAuthToken("UserOne");
+        ChessGame defaultGame = new ChessGame();
         int gameIDOne = gameDAO.createGame("FirstGame");
-
         // Execute the clear service
         clearService.clearAll();
 
