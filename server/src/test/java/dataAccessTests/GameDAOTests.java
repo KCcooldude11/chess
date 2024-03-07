@@ -43,11 +43,11 @@ public class GameDAOTests {
     @Test
     public void createGameFailure() {
         assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(null); // Assuming that passing null should fail
+            gameDAO.createGame(null);
         }, "Creating a game with a null name should throw DataAccessException.");
 
         assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(""); // Assuming that passing an empty string should fail
+            gameDAO.createGame("");
         }, "Creating a game with an empty name should throw DataAccessException.");
     }
 
@@ -68,10 +68,10 @@ public class GameDAOTests {
     @Test
     public void listGamesFailure() throws Exception {
         DatabaseManager.clearDatabase(); // Clear database to ensure isolation
-        conn.close(); // Intentionally close the connection to simulate a failure scenario
+        conn.close();
 
         assertThrows(DataAccessException.class, () -> {
-            gameDAO.listGames(); // This should fail due to the closed connection
+            gameDAO.listGames();
         }, "Listing games with a closed database connection should throw DataAccessException.");
     }
 

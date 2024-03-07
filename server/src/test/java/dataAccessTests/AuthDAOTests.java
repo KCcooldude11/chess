@@ -78,7 +78,6 @@ public class AuthDAOTests {
     @Test
     public void deleteAuthTokenSuccess() throws DataAccessException {
         String username = "testUser" + UUID.randomUUID();
-        // Ensure the user exists
         userDAO.createUser(username, "password", username + "@example.com");
         String authToken = authDAO.createAuthToken(username);
         authDAO.deleteAuthToken(authToken);
@@ -105,10 +104,6 @@ public class AuthDAOTests {
     @Test
     public void createAuthTokenFailure() {
         String nonExistentUsername = "nonExistentUser" + UUID.randomUUID();
-
-        // Attempt to create an auth token for a non-existent user
-        // This should fail because the user does not exist in the database,
-        // and a foreign key constraint violation should occur.
         assertThrows(DataAccessException.class, () -> {
             authDAO.createAuthToken(nonExistentUsername);
         }, "Attempting to create an auth token for a non-existent user should throw DataAccessException due to foreign key constraint violation.");
