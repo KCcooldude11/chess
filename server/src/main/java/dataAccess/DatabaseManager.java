@@ -9,9 +9,6 @@ public class DatabaseManager {
     private static final String password;
     private static final String connectionUrl;
 
-    /*a
-     * Load the database information for the db.properties file.
-     */
     static {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
@@ -34,15 +31,12 @@ public class DatabaseManager {
         try (Connection conn = DriverManager.getConnection(connectionUrl, user, password)) {
             conn.setCatalog(databaseName);
 
-            // List all tables that you want to clear. Be careful with the order if there are foreign key constraints.
             String[] tablesToClear = {"auth_tokens", "games", "users"};
 
-            // Disable foreign key checks to prevent constraint violations during deletion.
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("SET FOREIGN_KEY_CHECKS=0;");
             }
 
-            // Clear each table.
             for (String table : tablesToClear) {
                 try (Statement stmt = conn.createStatement()) {
                     String sql = "TRUNCATE TABLE " + table + ";";
@@ -50,7 +44,6 @@ public class DatabaseManager {
                 }
             }
 
-            // Re-enable foreign key checks.
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("SET FOREIGN_KEY_CHECKS=1;");
             }
@@ -74,18 +67,6 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Create a connection to the database and sets the catalog based upon the
-     * properties specified in db.properties. Connections to the database should
-     * be short-lived, and you must close the connection when you are done with it.
-     * The easiest way to do that is with a try-with-resource block.
-     * <br/>
-     * <code>
-     * try (var conn = DbInfo.getConnection(databaseName)) {
-     * // execute SQL statements.
-     * }
-     * </code>
-     */
     public static Connection getConnection() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(connectionUrl, user, password);

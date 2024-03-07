@@ -25,11 +25,10 @@ public class CreateGameTest {
         gameService = new GameService(gameDAO, authDAO);
     }
     void createUser(String username, String password, String email) throws DataAccessException {
-        // Use your UserDAO or equivalent method to insert a user into the database
+
         UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
         userDAO.createUser(username, password, email);
 
-        // Confirm that the user now exists in the database
         UserData user = userDAO.getUser(username);
         if (user == null) {
             throw new IllegalStateException("User creation failed. User does not exist in the database.");
@@ -39,13 +38,12 @@ public class CreateGameTest {
 
     @Test
     void createGameServiceSuccess() throws DataAccessException {
-        // First, create a user in the database
-        String username = "ExampleUsername";
-        String password = "password"; // Example password, adjust as needed
-        String email = "example@example.com"; // Example email, adjust as needed
-        createUser(username, password, email); // Make sure this user is now in the database
 
-        // Now that the user exists, create an auth token for them
+        String username = "ExampleUsername";
+        String password = "password";
+        String email = "example@example.com";
+        createUser(username, password, email);
+
         String authToken = authDAO.createAuthToken(username);
 
         CreateGame req = new CreateGame("TempGameName");

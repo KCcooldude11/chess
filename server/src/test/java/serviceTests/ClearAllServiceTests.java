@@ -24,15 +24,14 @@ public class ClearAllServiceTests {
 
     @Test
     void ensureCompleteDataCleanup() throws DataAccessException {
-        // Preliminary data setup
+
         userDAO.createUser("UserOne", "PasswordOne", "userone@example.com");
         String authTokenOne = authDAO.createAuthToken("UserOne");
         ChessGame defaultGame = new ChessGame();
         int gameIDOne = gameDAO.createGame("FirstGame");
-        // Execute the clear service
+
         clearService.clearAll();
 
-        // Validate that all data has been removed
         Assertions.assertNull(userDAO.getUser("UserOne"), "User data should be cleared.");
         Assertions.assertNull(authDAO.getAuthToken(authTokenOne), "Auth token data should be cleared.");
         Assertions.assertNull(gameDAO.getGame(gameIDOne), "Game data should be cleared.");

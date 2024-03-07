@@ -22,7 +22,7 @@ public class GameDAOTests {
     @BeforeEach
     public void setUp() throws Exception {
         conn = DatabaseManager.getConnection();
-        DatabaseManager.clearDatabase(); // Assuming this method clears all data
+        DatabaseManager.clearDatabase();
         gameDAO = new GameDAO(conn);
         UserDAO userDAO = new UserDAO(conn);
         userDAO.createUser("player1", "password1", "player1@example.com");
@@ -51,7 +51,7 @@ public class GameDAOTests {
 
     @Test
     public void getGameFailure() throws DataAccessException {
-        Integer invalidGameID = -1; // Assuming -1 is an invalid game ID
+        Integer invalidGameID = -1;
         GameData gameData = gameDAO.getGame(invalidGameID);
         assertNull(gameData, "Should return null for a non-existent game ID");
     }
@@ -62,12 +62,10 @@ public class GameDAOTests {
         GameData gameData = gameDAO.getGame(gameID);
         assertNotNull(gameData, "Precondition failed: GameData should not be null");
 
-        // Update game details
         gameData.setWhiteUsername("player1");
         gameData.setBlackUsername("player2");
         gameDAO.updateGame(gameData);
 
-        // Retrieve updated game data
         GameData updatedGameData = gameDAO.getGame(gameID);
         assertNotNull(updatedGameData, "Updated GameData should be retrieved successfully");
         assertEquals("player1", updatedGameData.getWhiteUsername(), "White player username should be updated");

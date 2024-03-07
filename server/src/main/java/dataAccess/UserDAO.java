@@ -8,7 +8,6 @@ import java.sql.*;
 public class UserDAO implements IUserDAO {
     private Connection connection;
 
-    // Constructor that accepts a database connection
     public UserDAO(Connection connection) {
         this.connection = connection;
     }

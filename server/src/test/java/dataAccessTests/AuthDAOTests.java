@@ -20,18 +20,17 @@ public class AuthDAOTests {
 
     @BeforeEach
     public void setUp() throws Exception {
-        // Initialize connection to your test database
+
         conn = DatabaseManager.getConnection();
-        // Make sure to clear the database before each test
+
         DatabaseManager.clearDatabase();
         authDAO = new AuthDAO(conn);
     }
 
     @AfterEach
     public void tearDown() throws Exception {
-        // Optionally, clear the database after each test
         DatabaseManager.clearDatabase();
-        // Close the connection
+
         if (conn != null) conn.close();
     }
 
@@ -47,11 +46,10 @@ public class AuthDAOTests {
 
     @Test
     public void createAuthTokenSuccess() throws DataAccessException, SQLException {
-        // Ensure the user exists in the database
+
         String username = "testUser";
         createUser(username, "testPassword", "testUser@example.com");
 
-        // Attempt to create an auth token for the user
         String authToken = authDAO.createAuthToken(username);
         assertNotNull(authToken, "Auth token should be generated");
     }
@@ -90,8 +88,6 @@ public class AuthDAOTests {
 
         authDAO.clearAuthTokens();
 
-        // Attempt to fetch a token to verify clearing
-        // This assumes getAuthToken would return null if not found, as per its implementation
         String someToken = "anyToken";
         AuthData result = authDAO.getAuthToken(someToken);
         assertNull(result, "All auth tokens should be cleared successfully");

@@ -18,12 +18,11 @@ public class ListAllGameServiceTest {
     void listGamesServiceSuccess() throws DataAccessException {
         GameDAO listGame = new GameDAO(DatabaseManager.getConnection());
         AuthDAO listAuthDAO = new AuthDAO(DatabaseManager.getConnection());
-        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection()); // Add this line to use UserDAO
+        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
         GameService listGameService = new GameService(listGame, listAuthDAO);
 
-        // Create a user before creating an authToken
         String username = "ExampleUsername";
-        userDAO.createUser(username, "password", username + "@example.com"); // Adjust parameters as needed for your createUser method
+        userDAO.createUser(username, "password", username + "@example.com");
 
         String authToken = listAuthDAO.createAuthToken(username);
         ChessGame defaultGame = new ChessGame();

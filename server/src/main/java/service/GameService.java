@@ -5,7 +5,6 @@ import model.AuthData;
 import model.GameData;
 import model.request.*;
 import model.end.*;
-import chess.ChessGame;
 
 public class GameService {
 
@@ -57,21 +56,18 @@ public class GameService {
         AuthData auth = authDAO.getAuthToken(authToken);
         if(req.getPlayerColor().equals("WHITE")) {
             if(game.getWhiteUsername() == null) {
-                // Directly modify the game's whiteUsername property
                 game.setWhiteUsername(auth.getUsername());
             } else {
                 throw new DataAccessException("Already taken");
             }
-        } else { // Assuming the only other valid option is "BLACK"
+        } else {
             if(game.getBlackUsername() == null) {
-                // Directly modify the game's blackUsername property
                 game.setBlackUsername(auth.getUsername());
             } else {
                 throw new DataAccessException("Already taken");
             }
         }
 
-        // Update the game with the modified object
         gameDAO.updateGame(game);
     }
 
