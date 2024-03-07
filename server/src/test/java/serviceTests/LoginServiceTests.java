@@ -19,6 +19,7 @@ public class LoginServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
+        DatabaseManager.clearDatabase();
         userDAO = new UserDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisAuthService = new UserService(userDAO, authDAO);

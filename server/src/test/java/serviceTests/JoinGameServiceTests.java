@@ -17,27 +17,38 @@ public class JoinGameServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
+                DatabaseManager.clearDatabase();
         gameDAO = new GameDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
         gameService = new GameService(gameDAO, authDAO);
     }
 
+    private void createUserWithAuthToken(String username) throws DataAccessException {
+        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
+        userDAO.createUser(username, "password", username + "@example.com");
+        authDAO.createAuthToken(username);
+    }
+
     @Test
     void verifySuccessfulGameJoining() throws DataAccessException {
-        String userToken = authDAO.createAuthToken("UniqueUser");
+        String username = "UniqueUser";
+        createUserWithAuthToken(username);
+        String userToken = authDAO.createAuthToken(username);
         int uniqueGameID = gameDAO.createGame("UniqueGame");
         JoinGame joinRequest = new JoinGame("WHITE", uniqueGameID);
 
         gameService.joinGame(joinRequest, userToken);
 
-        Assertions.assertTrue(gameDAO.getGame(uniqueGameID).getWhiteUsername().equals("UniqueUser"), "Game joining should correctly assign user to the WHITE role.");
+        Assertions.assertTrue(gameDAO.getGame(uniqueGameID).getWhiteUsername().equals(username), "Game joining should correctly assign user to the WHITE role.");
 
         gameDAO.clearAllGames();
     }
 
     @Test
     void handleErrorsWhenJoiningGame() throws DataAccessException {
-        String userAuthToken = authDAO.createAuthToken("PlayerOne");
+        String username = "PlayerOne";
+        createUserWithAuthToken(username);
+        String userAuthToken = authDAO.createAuthToken(username);
         int gameIdentity = gameDAO.createGame("ChallengeGame");
         JoinGame initialJoinRequest = new JoinGame("WHITE", gameIdentity);
 

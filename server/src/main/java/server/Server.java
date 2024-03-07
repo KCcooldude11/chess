@@ -23,6 +23,7 @@ public class Server {
     }
     private void initializeDAOs() {
         try {
+            DatabaseManager.initializeDatabase();
             this.userDAO = new UserDAO(DatabaseManager.getConnection());
             this.authDAO = new AuthDAO(DatabaseManager.getConnection());
             this.gameDAO = new GameDAO(DatabaseManager.getConnection());
@@ -123,6 +124,7 @@ public class Server {
             return "";
         }
         catch(DataAccessException e) {
+            System.out.println("DataAccessException in joinGameHandler: " + e.getMessage());
             if(Objects.equals(e.getMessage(), "Unauthorized")) {
                 response.status(401);
                 return new Gson().toJson(new ErrorMessage("Error: unauthorized"));
@@ -139,6 +141,7 @@ public class Server {
             return new Gson().toJson(new ErrorMessage("Error: DataAccessException thrown but not caught correctly"));
         }
         catch(Exception e) {
+            System.out.println("DataAccessException in joinGameHandler: " + e.getMessage());
             response.status(500);
             return new Gson().toJson(new ErrorMessage(e.getMessage()));
         }

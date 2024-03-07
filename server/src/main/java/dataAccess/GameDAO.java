@@ -45,8 +45,10 @@ public class GameDAO implements IGameDAO {
             if (rs.next()) {
                 String gameName = rs.getString("gameName");
                 String gameStateJson = rs.getString("gameState");
+                String whiteUsername = rs.getString("whiteUsername"); // Retrieve whiteUsername from the database
+                String blackUsername = rs.getString("blackUsername"); // Retrieve blackUsername from the database
                 ChessGame game = gson.fromJson(gameStateJson, ChessGame.class); // Deserialize the JSON string to a ChessGame object
-                return new GameData(gameID, null, null, gameName, game);
+                return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,11 +58,13 @@ public class GameDAO implements IGameDAO {
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
+        System.out.println("Listing all games from database");
         Collection<GameData> games = new ArrayList<>();
         String sql = "SELECT * FROM games";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
+                System.out.println("Game found with ID: " + rs.getInt("gameID"));
                 // Adjust according to your GameData constructor
                 games.add(new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
                         rs.getString("blackUsername"), rs.getString("gameName"),
@@ -74,6 +78,7 @@ public class GameDAO implements IGameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        System.out.println("updateGame called with gameID: " + game.getGameID());
         String sql = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ? WHERE gameID = ?";
         String gameState = gson.toJson(game.getGame()); // Serialize the ChessGame object to a JSON string
 

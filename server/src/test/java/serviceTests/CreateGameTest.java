@@ -7,6 +7,7 @@ import model.request.CreateGame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
+import model.UserData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,19 +19,41 @@ public class CreateGameTest {
 
     @BeforeEach
     void setUp() throws DataAccessException {
+                DatabaseManager.clearDatabase();
         gameDAO = new GameDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
         gameService = new GameService(gameDAO, authDAO);
     }
+    void createUser(String username, String password, String email) throws DataAccessException {
+        // Use your UserDAO or equivalent method to insert a user into the database
+        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
+        userDAO.createUser(username, password, email);
+
+        // Confirm that the user now exists in the database
+        UserData user = userDAO.getUser(username);
+        if (user == null) {
+            throw new IllegalStateException("User creation failed. User does not exist in the database.");
+        }
+    }
+
 
     @Test
     void createGameServiceSuccess() throws DataAccessException {
-        String authToken = authDAO.createAuthToken("ExampleUsername");
+        // First, create a user in the database
+        String username = "ExampleUsername";
+        String password = "password"; // Example password, adjust as needed
+        String email = "example@example.com"; // Example email, adjust as needed
+        createUser(username, password, email); // Make sure this user is now in the database
+
+        // Now that the user exists, create an auth token for them
+        String authToken = authDAO.createAuthToken(username);
+
         CreateGame req = new CreateGame("TempGameName");
         CreateGameEnd res = gameService.createGame(req, authToken);
 
         assertNotNull(gameDAO.getGame(res.gameID()));
     }
+
 
     @Test
     void createGameServiceErrors() {

@@ -20,6 +20,7 @@ public class LogoutServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
+        DatabaseManager.clearDatabase();
         userDAO = new UserDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisUserDAO = new UserService(userDAO, authDAO);

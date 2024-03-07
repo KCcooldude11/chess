@@ -25,7 +25,7 @@ public class GameService {
         if(req.getGameName() == null || req.getGameName().isEmpty()) {
             throw new DataAccessException("Bad request");
         }
-        ChessGame game = new ChessGame();
+
         Integer gameID = gameDAO.createGame(req.getGameName());
         return new CreateGameEnd(gameID);
     }
@@ -57,21 +57,21 @@ public class GameService {
         AuthData auth = authDAO.getAuthToken(authToken);
         if(req.getPlayerColor().equals("WHITE")) {
             if(game.getWhiteUsername() == null) {
-                game = new GameData(game.getGameID(), auth.getUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
-            }
-            else {
+                // Directly modify the game's whiteUsername property
+                game.setWhiteUsername(auth.getUsername());
+            } else {
                 throw new DataAccessException("Already taken");
             }
-        }
-        else {
+        } else { // Assuming the only other valid option is "BLACK"
             if(game.getBlackUsername() == null) {
-                game = new GameData(game.getGameID(), game.getWhiteUsername(), auth.getUsername(), game.getGameName(), game.getGame());
-            }
-            else {
+                // Directly modify the game's blackUsername property
+                game.setBlackUsername(auth.getUsername());
+            } else {
                 throw new DataAccessException("Already taken");
             }
         }
 
+        // Update the game with the modified object
         gameDAO.updateGame(game);
     }
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.UserService;
+import java.util.UUID;
 
 public class RegisterServiceTests {
 
@@ -18,6 +19,7 @@ public class RegisterServiceTests {
 
     @BeforeEach
     void setup() throws DataAccessException {
+        DatabaseManager.clearDatabase();
         userDAO = new UserDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
         thisUserDAO = new UserService(userDAO, authDAO);
@@ -25,14 +27,14 @@ public class RegisterServiceTests {
 
     @Test
     void successfulRegistration() throws DataAccessException {
-        Register registrationRequest = new Register("NewUser", "UserPassword", "user@example.com");
+        String uniqueEmail = "user" + UUID.randomUUID().toString() + "@example.com";
+        Register registrationRequest = new Register("NewUser", "UserPassword", uniqueEmail);
 
         var registrationResult = thisUserDAO.register(registrationRequest);
 
         Assertions.assertEquals("NewUser", registrationResult.username(), "The username should match the registration request.");
         Assertions.assertNotNull(registrationResult.authToken(), "The authToken should not be null after successful registration.");
     }
-
     @Test
     void registrationWithDuplicateUsername() throws DataAccessException {
         Register firstRegistration = new Register("UserOne", "PasswordOne", "emailOne@example.com");

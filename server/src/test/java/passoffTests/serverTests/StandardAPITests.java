@@ -72,6 +72,7 @@ public class StandardAPITests {
         //one user already logged in
         TestModels.TestLoginRegisterResult regResult = serverFacade.register(registerRequest);
         existingAuth = regResult.authToken;
+        System.out.println("Setting up badColorJoin test with existing user: " + existingUser + " and new user: " + newUser);
     }
 
 
@@ -548,6 +549,7 @@ public class StandardAPITests {
     @Order(19)
     @DisplayName("Join Bad Team Color")
     public void badColorJoin() throws TestException {
+        System.out.println("Attempting to join game with the same color as an existing player");
         //create game
         TestModels.TestCreateResult createResult = serverFacade.createGame(createRequest, existingAuth);
 
