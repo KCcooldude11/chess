@@ -17,6 +17,9 @@ public class GameDAO implements IGameDAO {
 
     @Override
     public Integer createGame(String gameName) throws DataAccessException {
+        if (gameName == null || gameName.isEmpty()) {
+            throw new DataAccessException("Game name cannot be null or empty.");
+        }
         String sql = "INSERT INTO games (gameName, gameState) VALUES (?, ?)";
         ChessGame defaultGameState = new ChessGame(); // Assuming initialization logic here
         String gameStateJson = gson.toJson(defaultGameState);
@@ -83,7 +86,10 @@ public class GameDAO implements IGameDAO {
             pstmt.setString(3, game.getGameName());
             pstmt.setString(4, gameState);
             pstmt.setInt(5, game.getGameID());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DataAccessException("Failed to update game: Game does not exist.");
+            }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to update game: " + e.getMessage());
         }

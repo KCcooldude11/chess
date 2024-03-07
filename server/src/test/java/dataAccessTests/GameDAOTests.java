@@ -40,6 +40,16 @@ public class GameDAOTests {
         Integer gameID = gameDAO.createGame("TestGame");
         assertNotNull(gameID, "Game should be created with a valid ID");
     }
+    @Test
+    public void createGameFailure() {
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.createGame(null); // Assuming that passing null should fail
+        }, "Creating a game with a null name should throw DataAccessException.");
+
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.createGame(""); // Assuming that passing an empty string should fail
+        }, "Creating a game with an empty name should throw DataAccessException.");
+    }
 
     @Test
     public void getGameSuccess() throws DataAccessException {
@@ -54,6 +64,15 @@ public class GameDAOTests {
         Integer invalidGameID = -1;
         GameData gameData = gameDAO.getGame(invalidGameID);
         assertNull(gameData, "Should return null for a non-existent game ID");
+    }
+    @Test
+    public void listGamesFailure() throws Exception {
+        DatabaseManager.clearDatabase(); // Clear database to ensure isolation
+        conn.close(); // Intentionally close the connection to simulate a failure scenario
+
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.listGames(); // This should fail due to the closed connection
+        }, "Listing games with a closed database connection should throw DataAccessException.");
     }
 
     @Test
@@ -71,6 +90,15 @@ public class GameDAOTests {
         assertEquals("player1", updatedGameData.getWhiteUsername(), "White player username should be updated");
         assertEquals("player2", updatedGameData.getBlackUsername(), "Black player username should be updated");
     }
+    @Test
+    public void updateGameFailure() throws DataAccessException {
+        // Attempting to update a game that does not exist
+        GameData nonExistentGame = new GameData(-1, null, null, "NonExistentGame", null);
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.updateGame(nonExistentGame);
+        }, "Attempting to update a non-existent game should throw DataAccessException.");
+    }
+
 
     @Test
     public void listGamesSuccess() throws DataAccessException {
