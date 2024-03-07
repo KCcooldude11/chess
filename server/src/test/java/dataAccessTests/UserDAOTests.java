@@ -41,7 +41,7 @@ public class UserDAOTests {
             userDAO.createUser("testUser", "password", "testUser@example.com");
             // Attempt to create a user with the same username should throw an exception
             userDAO.createUser("testUser", "newPassword", "testUser2@example.com");
-        });
+        }, "Expected DataAccessException to be thrown due to duplicate username");
     }
 
     @Test

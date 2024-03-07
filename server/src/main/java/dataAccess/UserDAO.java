@@ -40,7 +40,11 @@ public class UserDAO implements IUserDAO {
             pstmt.setString(3, email);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e.getSQLState().equals("23000")) {
+                throw new DataAccessException("A user with the given username already exists.");
+            } else {
+                throw new DataAccessException("Failed to create user: " + e.getMessage());
+            }
         }
     }
     public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
