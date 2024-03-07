@@ -13,7 +13,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -24,7 +24,7 @@ public class UserDAO implements IUserDAO {
                 return new UserData(username, password, email);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to retrieve user: " + e.getMessage());
         }
         return null;
     }
@@ -35,7 +35,7 @@ public class UserDAO implements IUserDAO {
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setString(2, hashedPassword); // Store the hashed password
+            pstmt.setString(2, hashedPassword);
             pstmt.setString(3, email);
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -46,6 +46,7 @@ public class UserDAO implements IUserDAO {
             }
         }
     }
+
     public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
         String sql = "SELECT password FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -56,7 +57,7 @@ public class UserDAO implements IUserDAO {
                 return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to verify user: " + e.getMessage());
         }
         return false;
     }
@@ -67,7 +68,7 @@ public class UserDAO implements IUserDAO {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to clear all users: " + e.getMessage());
         }
     }
 }

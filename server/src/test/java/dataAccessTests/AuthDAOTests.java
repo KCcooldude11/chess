@@ -1,6 +1,6 @@
 package dataAccessTests;
 
-import dataAccess.AuthDAO;
+import dataAccess.*;
 import dataAccess.DataAccessException;
 import dataAccess.DatabaseManager;
 import model.AuthData;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +18,9 @@ public class AuthDAOTests {
 
     private Connection conn;
     private AuthDAO authDAO;
+    private
+
+    UserDAO userDAO;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -25,6 +29,7 @@ public class AuthDAOTests {
 
         DatabaseManager.clearDatabase();
         authDAO = new AuthDAO(conn);
+        userDAO = new UserDAO(conn);
     }
 
     @AfterEach
@@ -72,7 +77,9 @@ public class AuthDAOTests {
 
     @Test
     public void deleteAuthTokenSuccess() throws DataAccessException {
-        String username = "testUser";
+        String username = "testUser" + UUID.randomUUID();
+        // Ensure the user exists
+        userDAO.createUser(username, "password", username + "@example.com");
         String authToken = authDAO.createAuthToken(username);
         authDAO.deleteAuthToken(authToken);
         AuthData result = authDAO.getAuthToken(authToken);
@@ -81,9 +88,12 @@ public class AuthDAOTests {
 
     @Test
     public void clearAuthTokensSuccess() throws DataAccessException {
-        String username1 = "testUser1";
+        String username1 = "testUser1" + UUID.randomUUID();
+        String username2 = "testUser2" + UUID.randomUUID();
+        // Ensure the users exist
+        userDAO.createUser(username1, "password1", username1 + "@example.com");
+        userDAO.createUser(username2, "password2", username2 + "@example.com");
         authDAO.createAuthToken(username1);
-        String username2 = "testUser2";
         authDAO.createAuthToken(username2);
 
         authDAO.clearAuthTokens();

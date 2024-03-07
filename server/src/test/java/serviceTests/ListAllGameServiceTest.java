@@ -1,53 +1,67 @@
 package serviceTests;
 
 import chess.ChessGame;
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.DatabaseManager;
-import dataAccess.GameDAO;
+import dataAccess.*;
 import model.request.ListGames;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
-import dataAccess.*;
+
 import java.util.UUID;
 
 public class ListAllGameServiceTest {
+    private GameDAO gameDAO;
+    private AuthDAO authDAO;
+    private UserDAO userDAO;
+    private GameService gameService;
+
+    @BeforeEach
+    void setUp() throws DataAccessException {
+        // Initialize DAOs
+        gameDAO = new GameDAO(DatabaseManager.getConnection());
+        authDAO = new AuthDAO(DatabaseManager.getConnection());
+        userDAO = new UserDAO(DatabaseManager.getConnection());
+        gameService = new GameService(gameDAO, authDAO);
+
+        // Clear database tables involved in tests
+        DatabaseManager.clearDatabase();
+    }
+
+    @AfterEach
+    void tearDown() throws DataAccessException {
+        // Optional: Clear database tables again to ensure a clean state for other tests
+        DatabaseManager.clearDatabase();
+    }
+
     @Test
     void listGamesServiceSuccess() throws DataAccessException {
-        GameDAO listGame = new GameDAO(DatabaseManager.getConnection());
-        AuthDAO listAuthDAO = new AuthDAO(DatabaseManager.getConnection());
-        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
-        GameService listGameService = new GameService(listGame, listAuthDAO);
+        // Ensure unique username by using a UUID
+        String uniqueUsername = "ExampleUsername" + UUID.randomUUID();
+        userDAO.createUser(uniqueUsername, "password", uniqueUsername + "@example.com");
 
-        String username = "ExampleUsername";
-        userDAO.createUser(username, "password", username + "@example.com");
+        String authToken = authDAO.createAuthToken(uniqueUsername);
+        gameDAO.createGame("Game1");
+        gameDAO.createGame("Game2");
+        gameDAO.createGame("Game3");
+        gameDAO.createGame("Game4");
 
-        String authToken = listAuthDAO.createAuthToken(username);
-        ChessGame defaultGame = new ChessGame();
-        listGame.createGame("Game1");
-        listGame.createGame("Game2");
-        listGame.createGame("Game3");
-        listGame.createGame("Game4");
         ListGames req = new ListGames(authToken);
-        var res = listGameService.listGames(req);
+        var res = gameService.listGames(req);
+
         Assertions.assertEquals(4, res.games().size());
-        listGame.clearAllGames();
     }
 
     @Test
     void listGamesServiceErrors() throws DataAccessException {
-        GameDAO ListError = new GameDAO(DatabaseManager.getConnection());
-        AuthDAO authError = new AuthDAO(DatabaseManager.getConnection());
-        GameService listGameService = new GameService(ListError, authError);
-        authError.createAuthToken("ExampleUsername");
+        String uniqueUsername = "ExampleUsername" + UUID.randomUUID();
+        userDAO.createUser(uniqueUsername, "password", uniqueUsername + "@example.com");
+
+        String validAuthToken = authDAO.createAuthToken(uniqueUsername);
+
+        // Use an invalid auth token
         ListGames req = new ListGames(UUID.randomUUID().toString());
-        Assertions.assertThrows(DataAccessException.class, () -> listGameService.listGames(req));
-        try {
-            ListError.clearAllGames();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertThrows(DataAccessException.class, () -> gameService.listGames(req), "Attempting to list games with an invalid auth token should throw an error.");
     }
 }

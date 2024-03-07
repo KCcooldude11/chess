@@ -18,15 +18,15 @@ public class GameDAO implements IGameDAO {
     @Override
     public Integer createGame(String gameName) throws DataAccessException {
         String sql = "INSERT INTO games (gameName, gameState) VALUES (?, ?)";
-        ChessGame defaultGameState = new ChessGame();
-        String gameStateJson = gson.toJson(defaultGameState); // Serialize default or empty game state to JSON
+        ChessGame defaultGameState = new ChessGame(); // Assuming initialization logic here
+        String gameStateJson = gson.toJson(defaultGameState);
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, gameName);
             pstmt.setString(2, gameStateJson);
             pstmt.executeUpdate();
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getInt(1); // Return the auto-generated gameID
+                    return rs.getInt(1);
                 }
             }
         } catch (SQLException e) {
@@ -46,11 +46,11 @@ public class GameDAO implements IGameDAO {
                 String gameStateJson = rs.getString("gameState");
                 String whiteUsername = rs.getString("whiteUsername");
                 String blackUsername = rs.getString("blackUsername");
-                ChessGame game = gson.fromJson(gameStateJson, ChessGame.class); // Deserialize the JSON string to a ChessGame object
+                ChessGame game = gson.fromJson(gameStateJson, ChessGame.class);
                 return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to retrieve game data: " + e.getMessage());
         }
         return null;
     }
@@ -64,10 +64,10 @@ public class GameDAO implements IGameDAO {
             while (rs.next()) {
                 games.add(new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
                         rs.getString("blackUsername"), rs.getString("gameName"),
-                        null));
+                        gson.fromJson(rs.getString("gameState"), ChessGame.class))); // Adjust the deserialization according to your needs
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to list games: " + e.getMessage());
         }
         return games;
     }
@@ -75,7 +75,7 @@ public class GameDAO implements IGameDAO {
     @Override
     public void updateGame(GameData game) throws DataAccessException {
         String sql = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ? WHERE gameID = ?";
-        String gameState = gson.toJson(game.getGame()); // Serialize the ChessGame object to a JSON string
+        String gameState = gson.toJson(game.getGame());
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, game.getWhiteUsername());
@@ -85,16 +85,18 @@ public class GameDAO implements IGameDAO {
             pstmt.setInt(5, game.getGameID());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to update game: " + e.getMessage());
         }
     }
+
     @Override
     public void clearAllGames() throws DataAccessException {
         String sql = "DELETE FROM games";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Failed to clear all games: " + e.getMessage());
         }
     }
 }
+

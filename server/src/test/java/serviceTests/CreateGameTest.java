@@ -15,6 +15,7 @@ public class CreateGameTest {
 
     private GameDAO gameDAO;
     private AuthDAO authDAO;
+    private UserDAO userDAO;
     private GameService gameService;
 
     @BeforeEach
@@ -22,11 +23,11 @@ public class CreateGameTest {
                 DatabaseManager.clearDatabase();
         gameDAO = new GameDAO(DatabaseManager.getConnection());
         authDAO = new AuthDAO(DatabaseManager.getConnection());
+        userDAO = new UserDAO(DatabaseManager.getConnection());
         gameService = new GameService(gameDAO, authDAO);
     }
     void createUser(String username, String password, String email) throws DataAccessException {
 
-        UserDAO userDAO = new UserDAO(DatabaseManager.getConnection());
         userDAO.createUser(username, password, email);
 
         UserData user = userDAO.getUser(username);
@@ -54,13 +55,18 @@ public class CreateGameTest {
 
 
     @Test
-    void createGameServiceErrors() {
+    void createGameServiceErrors() throws DataAccessException {
+        // Create a user first
+        userDAO.createUser("ExampleUsername", "password", "email@example.com");
+
         String validAuthToken = authDAO.createAuthToken("ExampleUsername");
         String invalidAuthToken = UUID.randomUUID().toString();
         CreateGame validReq = new CreateGame("TempGameName");
         CreateGame invalidReq = new CreateGame(null);
 
+        // Now the creation of an auth token should not throw a foreign key constraint violation
         assertThrows(DataAccessException.class, () -> gameService.createGame(validReq, invalidAuthToken));
         assertThrows(DataAccessException.class, () -> gameService.createGame(invalidReq, validAuthToken));
     }
+
 }

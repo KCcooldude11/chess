@@ -12,8 +12,6 @@ public class Main {
             server.run(8080);
         } catch (Exception e) { // Catching Exception instead of DataAccessException
             System.err.println("Failed to start the server: " + e.getMessage());
-            e.printStackTrace();
-            // Consider exiting the application if the server cannot start
             System.exit(1);
         }
     }
