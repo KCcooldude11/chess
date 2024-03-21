@@ -1,67 +1,103 @@
 package ui;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
+import static ui.EscapeSequences.*;
 
 public class ChessBoardDisplay {
-    private static final String EMPTY = "   ";
-    private static final String[] BOARD_FILES = {"a", "b", "c", "d", "e", "f", "g", "h"};
 
-    // Unicode symbols for chess pieces
-    private static final String WHITE_PAWN = "\u2659";
-    private static final String WHITE_ROOK = "\u2656";
-    private static final String WHITE_KNIGHT = "\u2658";
-    private static final String WHITE_BISHOP = "\u2657";
-    private static final String WHITE_QUEEN = "\u2655";
-    private static final String WHITE_KING = "\u2654";
-    private static final String BLACK_PAWN = "\u265F";
-    private static final String BLACK_ROOK = "\u265C";
-    private static final String BLACK_KNIGHT = "\u265E";
-    private static final String BLACK_BISHOP = "\u265D";
-    private static final String BLACK_QUEEN = "\u265B";
-    private static final String BLACK_KING = "\u265A";
-
-    // Method to print the initial chess board
+    // Assuming EscapeSequences class is defined in the same package
+    private static final int BOARD_SIZE = 10; // Total board size including labels
     public static void printInitialChessBoard() {
-        String[][] board = new String[8][8];
+        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        String[][] board = setupInitialBoard(); // Initialize the chess board with pieces
+        printBoard(out, board); // Print the initialized chess board
+    }
+    private static void printBoard(PrintStream out, String[][] board) {
+        // Print top file labels
+        printFileLabels(out, true);
 
-        // Setting up black pieces
-        board[0] = new String[]{BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
-        java.util.Arrays.fill(board[1], BLACK_PAWN);
+        for (int i = 1; i <= 8; i++) {
+            // Adjust for the offset due to outer file and rank labels
+            int boardRow = i - 1;
+            out.printf("%d ", 9 - i); // Print the rank number on the left
 
-        // Setting up empty squares
-        for (int i = 2; i <= 5; i++) {
-            java.util.Arrays.fill(board[i], EMPTY);
+            for (int j = 1; j <= 8; j++) {
+                int boardCol = j - 1;
+                String bg = (boardRow + boardCol) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                String fg = (boardRow + boardCol) % 2 == 0 ? EscapeSequences.SET_TEXT_COLOR_BLACK : EscapeSequences.SET_TEXT_COLOR_WHITE;
+
+                out.print(bg + fg + board[boardRow][boardCol] + EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+            }
+
+            out.println(" " + (9 - i)); // Print the rank number again on the right
         }
 
-        // Setting up white pieces
-        java.util.Arrays.fill(board[6], WHITE_PAWN);
-        board[7] = new String[]{WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
-
-        // Print board from white's perspective
-        System.out.println("Chess board from White's perspective:");
-        printBoard(board);
-
-        // Print board from black's perspective (simply reverse the order)
-        System.out.println("\nChess board from Black's perspective:");
-        java.util.Collections.reverse(java.util.Arrays.asList(board)); // Reverse the board array
-        printBoard(board);
+        // Print bottom file labels
+        printFileLabels(out, false);
     }
 
-    private static void printBoard(String[][] board) {
-        for (int i = 0; i < board.length; i++) {
-            System.out.print((8 - i) + " "); // Rank numbers
-            for (int j = 0; j < board[i].length; j++) {
-                System.out.print("|" + board[i][j]);
-            }
-            System.out.println("|");
+    private static void printFileLabels(PrintStream out, boolean top) {
+        if (top) {
+            out.print("   "); // Initial spaces for alignment
+        } else {
+            out.print("  "); // Adjust for left margin alignment
         }
-        // Print file letters
-        System.out.print("   "); // Align with rank numbers
-        for (String file : BOARD_FILES) {
-            System.out.print(" " + file + " ");
+
+        for (char file = 'a'; file <= 'h'; file++) {
+            out.print(" " + file + " "); // Center each file label under its column
         }
-        System.out.println(); // Ensure the next line in the console is empty
+
+        if (!top) {
+            out.print("  "); // Ending spaces for alignment
+        }
+        out.println(); // Newline after file labels
     }
 
     public static void main(String[] args) {
-        printInitialChessBoard();
+        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        String[][] board = setupInitialBoard(); // Assume setupInitialBoard method initializes the chess board
+        printBoard(out, board);
+    }
+
+    // Setup the initial board with pieces, similar to previous implementations
+    private static String[][] setupInitialBoard() {
+        String[][] board = new String[8][8];
+
+        // Setup black pieces
+        board[0][0] = EscapeSequences.BLACK_ROOK;
+        board[0][1] = EscapeSequences.BLACK_KNIGHT;
+        board[0][2] = EscapeSequences.BLACK_BISHOP;
+        board[0][3] = EscapeSequences.BLACK_QUEEN;
+        board[0][4] = EscapeSequences.BLACK_KING;
+        board[0][5] = EscapeSequences.BLACK_BISHOP;
+        board[0][6] = EscapeSequences.BLACK_KNIGHT;
+        board[0][7] = EscapeSequences.BLACK_ROOK;
+        for (int i = 0; i < 8; i++) {
+            board[1][i] = EscapeSequences.BLACK_PAWN;
+        }
+
+        // Setup empty squares
+        for (int row = 2; row < 6; row++) {
+            for (int col = 0; col < 8; col++) {
+                board[row][col] = EscapeSequences.EMPTY;
+            }
+        }
+
+        // Setup white pieces
+        for (int i = 0; i < 8; i++) {
+            board[6][i] = EscapeSequences.WHITE_PAWN;
+        }
+        board[7][0] = EscapeSequences.WHITE_ROOK;
+        board[7][1] = EscapeSequences.WHITE_KNIGHT;
+        board[7][2] = EscapeSequences.WHITE_BISHOP;
+        board[7][3] = EscapeSequences.WHITE_QUEEN;
+        board[7][4] = EscapeSequences.WHITE_KING;
+        board[7][5] = EscapeSequences.WHITE_BISHOP;
+        board[7][6] = EscapeSequences.WHITE_KNIGHT;
+        board[7][7] = EscapeSequences.WHITE_ROOK;
+
+        return board;
     }
 }
+
