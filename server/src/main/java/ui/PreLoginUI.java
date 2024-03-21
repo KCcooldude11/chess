@@ -14,16 +14,24 @@ public class PreLoginUI {
         this.reader = new BufferedReader(new InputStreamReader(System.in));
     }
 
-    public void run() throws IOException {
+    public AuthData run() throws IOException {
         System.out.println("Welcome to 240 chess. Type Help to get started.");
         while (true) {
             String input = reader.readLine().trim();
             if ("help".equalsIgnoreCase(input)) {
                 displayHelp();
             } else if (input.startsWith("register ")) {
-                register(input);
+                AuthData authData = register(input);
+                if (authData != null) {
+                    System.out.println("Registration successful.");
+                    return authData; // Return AuthData upon successful registration
+                }
             } else if (input.startsWith("login ")) {
-                login(input);
+                AuthData authData = login(input);
+                if (authData != null) {
+                    System.out.println("Login successful.");
+                    return authData; // Return AuthData upon successful login
+                }
             } else if ("quit".equalsIgnoreCase(input)) {
                 quit();
                 break; // Exit the loop to terminate the program
@@ -31,6 +39,7 @@ public class PreLoginUI {
                 System.out.println("Unknown command. Type 'help' for a list of commands.");
             }
         }
+        return null; // Return null if the loop exits without logging in or registering
     }
 
     private void displayHelp() {
@@ -47,11 +56,11 @@ public class PreLoginUI {
         System.out.println(ANSI_BLUE + "help" + ANSI_WHITE + " - with possible commands" + ANSI_RESET);
     }
 
-    private void login(String input) throws IOException {
+    private AuthData login(String input) throws IOException {
         String[] parts = input.split(" ");
         if (parts.length != 3) {
             System.out.println("Invalid login command. Correct format: login <USERNAME> <PASSWORD>");
-            return;
+            return null;
         }
         String username = parts[1];
         String password = parts[2];
@@ -59,17 +68,18 @@ public class PreLoginUI {
         try {
             AuthData authData = facade.login(username, password);
             System.out.println("Login successful.");
-            // Transition to PostLogin UI here
+            return authData;
         } catch (IOException | InterruptedException e) {
             System.out.println("Login failed: " + e.getMessage());
         }
+        return null;
     }
 
-    private void register(String input) throws IOException {
+    private AuthData register(String input) throws IOException {
         String[] parts = input.split(" ");
         if (parts.length != 4) {
             System.out.println("Invalid register command. Correct format: register <USERNAME> <PASSWORD> <EMAIL>");
-            return;
+            return null;
         }
         String username = parts[1];
         String password = parts[2];
@@ -78,10 +88,11 @@ public class PreLoginUI {
         try {
             AuthData authData = facade.register(username, password, email);
             System.out.println("Registration successful.");
-            // Transition to PostLogin UI here
+            return authData;
         } catch (IOException | InterruptedException e) {
             System.out.println("Registration failed: " + e.getMessage());
         }
+        return null;
     }
 
     private void quit() {

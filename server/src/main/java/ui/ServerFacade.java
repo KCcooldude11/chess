@@ -10,6 +10,7 @@ import model.request.*;
 import java.util.List;
 import java.util.Map;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 public class ServerFacade {
     private final String serverUrl;
 
@@ -78,8 +79,13 @@ public class ServerFacade {
             // Assuming the server returns a JSON object with the game ID
             var responseMap = new Gson().fromJson(response.body(), Map.class);
             // Extract the game ID from the response. Adjust the key if necessary based on your actual response format.
-            Number gameId = (Number) responseMap.get("gameId"); // Gson parses numbers as Double, Long, or other Number types depending on the actual value
-            return gameId.intValue(); // Convert to Integer
+            Number gameId = (Number) responseMap.get("gameID"); // Gson parses numbers as Double, Long, or other Number types depending on the actual value
+            if (gameId != null) { // Check if gameId is not null before attempting to use it
+                return gameId.intValue(); // Convert to Integer
+            } else {
+                System.out.println("Game ID was not returned by the server.");
+                return null; // Return null if gameId is not present in the response
+            }
         } else {
             throw new IOException("Failed to create game: " + response.body());
         }
@@ -94,7 +100,12 @@ public class ServerFacade {
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            return new Gson().fromJson(response.body(), new TypeToken<List<GameData>>(){}.getType());
+            // Explicitly declare the type of the responseObject
+            Type responseType = new TypeToken<Map<String, List<GameData>>>(){}.getType();
+            Map<String, List<GameData>> responseObject = new Gson().fromJson(response.body(), responseType);
+
+            // Now you can safely call .get("games") on responseObject
+            return responseObject.get("games"); // Extract the array from the object
         } else {
             throw new IOException("Failed to list games: " + response.body());
         }
@@ -102,7 +113,7 @@ public class ServerFacade {
     public void joinGame(String authToken, int gameId, String playerColor) throws IOException, InterruptedException {
         JoinGame requestPayload = new JoinGame(playerColor, gameId);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + "/game/join")) // Adjust if your endpoint differs
+                .uri(URI.create(serverUrl + "/game")) // Adjust if your endpoint differs
                 .header("Content-Type", "application/json")
                 .header("Authorization", authToken)
                 .PUT(HttpRequest.BodyPublishers.ofString(new Gson().toJson(requestPayload)))
@@ -117,7 +128,7 @@ public class ServerFacade {
     public void observeGame(String authToken, int gameId) throws IOException, InterruptedException {
         // Assuming the server expects a simple GET request with the game ID in the query string or path
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + "/game/observe/" + gameId)) // Example URL structure
+                .uri(URI.create(serverUrl + "/game" + gameId)) // Example URL structure
                 .header("Authorization", authToken)
                 .GET()
                 .build();

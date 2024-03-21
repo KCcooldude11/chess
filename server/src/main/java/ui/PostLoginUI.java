@@ -101,29 +101,15 @@ public class PostLoginUI {
         try {
             facade.joinGame(authToken, gameId, playerColor);
             System.out.println("Joined game " + gameId + " as " + playerColor);
-            // You might want to transition to a game view or gameplay UI here
+            ChessBoardDisplay.printInitialChessBoard();
         } catch (Exception e) {
             System.out.println("Failed to join game: " + e.getMessage());
         }
     }
 
     private void observeGame() throws IOException {
-        System.out.print("Enter the game ID you want to observe: ");
-        int gameId;
-        try {
-            gameId = Integer.parseInt(reader.readLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid game ID.");
-            return;
-        }
-
-        try {
-            facade.observeGame(authToken, gameId);
-            System.out.println("Observing game " + gameId);
-            // Here, you might transition to a game observation view
-        } catch (Exception e) {
-            System.out.println("Failed to observe game: " + e.getMessage());
-        }
+        System.out.println("Observing game: (Full logic to be implemented in phase 6 with websockets)");
+        ChessBoardDisplay.printInitialChessBoard();
     }
 
     private void logout() throws IOException, InterruptedException {

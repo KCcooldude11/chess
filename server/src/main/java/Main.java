@@ -4,6 +4,7 @@ import dataAccess.*;
 import server.Server;
 import ui.*;
 import java.io.IOException;
+import model.*;
 
 //public class Main {
 //    public static void main(String[] args) {
@@ -39,8 +40,13 @@ public class Main {
         PreLoginUI preLoginUI = new PreLoginUI(facade);
 
         try {
-            preLoginUI.run();
-        } catch (IOException e) {
+            AuthData authData = preLoginUI.run();
+            if(authData != null){
+                System.out.println("Proceeding to the game lobby...");
+                PostLoginUI postLoginUI = new PostLoginUI(facade, authData.getAuthToken());
+                postLoginUI.run(); // Start the post-login UI interaction
+            }
+        } catch (IOException | InterruptedException e) {
             System.out.println("An error occurred in PreLoginUI: " + e.getMessage());
             e.printStackTrace();
         }

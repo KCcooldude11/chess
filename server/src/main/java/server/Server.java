@@ -91,9 +91,11 @@ public class Server {
     private Object createGameHandler(Request request, Response response) {
         GameService gameService = new GameService(gameDAO, authDAO);
         try {
+            System.out.println("Creating game - Received request: " + request.body()); // Debug statement
             String authToken = request.headers("authorization");
             var thisReq = new Gson().fromJson(request.body(), CreateGame.class);
             var thisRes = gameService.createGame(thisReq, authToken);
+            System.out.println("Creating game - Generated response: " + new Gson().toJson(thisRes)); // Debug statement
             return new Gson().toJson(thisRes);
         }
         catch(DataAccessException e) {
