@@ -30,7 +30,8 @@ public class ServerFacade {
         if (response.statusCode() == 200) {
             // Assuming successful registration returns AuthData
             return new Gson().fromJson(response.body(), AuthData.class);
-        } else {
+        }
+        else {
             // Handle errors or unsuccessful registration
             throw new IOException("Registration failed: " + response.body());
         }
@@ -125,18 +126,18 @@ public class ServerFacade {
             throw new IOException("Failed to join game: " + response.body());
         }
     }
-    public void observeGame(String authToken, int gameId) throws IOException, InterruptedException {
-        // Assuming the server expects a simple GET request with the game ID in the query string or path
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + "/game" + gameId)) // Example URL structure
-                .header("Authorization", authToken)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != 200) {
-            throw new IOException("Failed to observe game: " + response.body());
-        }
-    }
+//    public void observeGame(String authToken, int gameId) throws IOException, InterruptedException {
+//        // Assuming the server expects a simple GET request with the game ID in the query string or path
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .uri(URI.create(serverUrl + "/game" + gameId)) // Example URL structure
+//                .header("Authorization", authToken)
+//                .GET()
+//                .build();
+//
+//        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+//
+//        if (response.statusCode() != 200) {
+//            throw new IOException("Failed to observe game: " + response.body());
+//        }
+//    }
 }
