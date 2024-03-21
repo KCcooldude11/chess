@@ -65,16 +65,65 @@ public class PostLoginUI {
     }
 
     private void listGames() throws IOException {
-        // Implementation for listing games
-        // Use facade.listGames(authToken) and display the result
+        try {
+            var games = facade.listGames(authToken);
+            if (games.isEmpty()) {
+                System.out.println("No games available.");
+            } else {
+                System.out.println("Available games:");
+                for (int i = 0; i < games.size(); i++) {
+                    var game = games.get(i);
+                    System.out.printf("%d. %s - Players: %s vs %s\n", i + 1, game.getGameName(), game.getWhiteUsername(), game.getBlackUsername());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to list games: " + e.getMessage());
+        }
     }
 
     private void joinGame() throws IOException {
-        // Prompt for game ID and player color, then use facade.joinGame
+        System.out.print("Enter the game ID you want to join: ");
+        int gameId;
+        try {
+            gameId = Integer.parseInt(reader.readLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid game ID.");
+            return;
+        }
+
+        System.out.print("Enter your color (WHITE/BLACK): ");
+        String playerColor = reader.readLine().toUpperCase();
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            System.out.println("Invalid color. Choose 'WHITE' or 'BLACK'.");
+            return;
+        }
+
+        try {
+            facade.joinGame(authToken, gameId, playerColor);
+            System.out.println("Joined game " + gameId + " as " + playerColor);
+            // You might want to transition to a game view or gameplay UI here
+        } catch (Exception e) {
+            System.out.println("Failed to join game: " + e.getMessage());
+        }
     }
 
     private void observeGame() throws IOException {
-        // Prompt for game ID, then use facade.observeGame
+        System.out.print("Enter the game ID you want to observe: ");
+        int gameId;
+        try {
+            gameId = Integer.parseInt(reader.readLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid game ID.");
+            return;
+        }
+
+        try {
+            facade.observeGame(authToken, gameId);
+            System.out.println("Observing game " + gameId);
+            // Here, you might transition to a game observation view
+        } catch (Exception e) {
+            System.out.println("Failed to observe game: " + e.getMessage());
+        }
     }
 
     private void logout() throws IOException, InterruptedException {
