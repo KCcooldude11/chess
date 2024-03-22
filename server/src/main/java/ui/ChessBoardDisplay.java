@@ -1,103 +1,137 @@
 package ui;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
+import chess.ChessGame;
 import static ui.EscapeSequences.*;
 
 public class ChessBoardDisplay {
+    private static String getPieceSymbol(ChessPiece piece, boolean isBlackSquare) {
+        String symbol;
+        String pieceColor;
+        String squareColor = isBlackSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
 
-    // Assuming EscapeSequences class is defined in the same package
-    private static final int BOARD_SIZE = 10; // Total board size including labels
-    public static void printInitialChessBoard() {
-        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        String[][] board = setupInitialBoard(); // Initialize the chess board with pieces
-        printBoard(out, board); // Print the initialized chess board
-    }
-    private static void printBoard(PrintStream out, String[][] board) {
-        // Print top file labels
-        printFileLabels(out, true);
-
-        for (int i = 1; i <= 8; i++) {
-            // Adjust for the offset due to outer file and rank labels
-            int boardRow = i - 1;
-            out.printf("%d ", 9 - i); // Print the rank number on the left
-
-            for (int j = 1; j <= 8; j++) {
-                int boardCol = j - 1;
-                String bg = (boardRow + boardCol) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
-                String fg = (boardRow + boardCol) % 2 == 0 ? EscapeSequences.SET_TEXT_COLOR_BLACK : EscapeSequences.SET_TEXT_COLOR_WHITE;
-
-                out.print(bg + fg + board[boardRow][boardCol] + EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-            }
-
-            out.println(" " + (9 - i)); // Print the rank number again on the right
+        if (piece == null) {
+            // For an empty square, just set the square color
+            return squareColor + "   " + RESET_BG_COLOR; // Three spaces for an empty square
         }
 
-        // Print bottom file labels
-        printFileLabels(out, false);
-    }
-
-    private static void printFileLabels(PrintStream out, boolean top) {
-        if (top) {
-            out.print("   "); // Initial spaces for alignment
+        // Determine the color of the chess piece
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            pieceColor = SET_TEXT_COLOR_WHITE;
         } else {
-            out.print("  "); // Adjust for left margin alignment
+            pieceColor = SET_TEXT_COLOR_BLACK; // Or any other color you wish to use for black pieces
         }
 
-        for (char file = 'a'; file <= 'h'; file++) {
-            out.print(" " + file + " "); // Center each file label under its column
+        // Assign symbols based on the piece type
+        switch (piece.getPieceType()) {
+            case PAWN:
+                symbol = "P";
+                break;
+            case ROOK:
+                symbol = "R";
+                break;
+            case KNIGHT:
+                symbol = "N";
+                break;
+            case BISHOP:
+                symbol = "B";
+                break;
+            case QUEEN:
+                symbol = "Q";
+                break;
+            case KING:
+                symbol = "K";
+                break;
+            default:
+                symbol = " ";
         }
 
-        if (!top) {
-            out.print("  "); // Ending spaces for alignment
+        // Return the colored piece on its square
+        // Adding squareColor at the beginning colors the background of the square
+        // pieceColor sets the color of the piece symbol
+        // RESET_BG_COLOR at the end resets the background color for subsequent text
+        return squareColor + pieceColor + " " + symbol + " " + RESET_BG_COLOR;
+    }
+    public static void printChessBoard(ChessBoard chessBoard, boolean isWhitePerspective) {
+        final String whitePieceColor = SET_TEXT_COLOR_WHITE;
+        final String blackPieceColor = SET_TEXT_COLOR_YELLOW; // Yellow for contrast, change as needed
+        final String blackColorSquare = SET_BG_COLOR_BLACK;
+        final String whiteColorSquare = SET_BG_COLOR_WHITE;
+        final String resetColor = RESET_TEXT_COLOR + RESET_BG_COLOR;
+        System.out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
+        if (isWhitePerspective) {
+            printBoardFromPerspective(chessBoard, true);
+        } else {
+            printBoardFromPerspective(chessBoard, false);
         }
-        out.println(); // Newline after file labels
+    }
+
+    private static void printBoardFromPerspective(ChessBoard chessBoard, boolean isWhitePerspective) {
+        System.out.print("  "); // Align with row numbers
+        char[] topColumns = isWhitePerspective ? new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'} : new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
+        for (char column : topColumns) {
+            System.out.print(SET_TEXT_COLOR_WHITE + " " + column + " ");
+        }
+        System.out.print("\n");
+
+        // Determine the starting and ending row numbers based on perspective
+        int startRow = isWhitePerspective ? 1 : 8;
+        int endRow = isWhitePerspective ? 8 : 1;
+        int rowIncrement = isWhitePerspective ? 1 : -1;
+
+        for (int row = startRow; isWhitePerspective ? row <= endRow : row >= endRow; row += rowIncrement) {
+            System.out.print(SET_TEXT_COLOR_WHITE + row + " "); // Print row number
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = chessBoard.getPiece(position);
+                boolean isBlackSquare = (row + col) % 2 == 0;
+                String pieceSymbol = getPieceSymbol(piece, isBlackSquare);
+                System.out.print(pieceSymbol);
+            }
+            System.out.println(SET_TEXT_COLOR_WHITE + " " + row + RESET_BG_COLOR); // Print row number again and reset background color
+        }
+
+        // Print bottom column labels based on perspective
+        System.out.print("  "); // Align with row numbers
+        char[] bottomColumns = isWhitePerspective ? new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'} : new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
+        for (char column : bottomColumns) {
+            System.out.print(SET_TEXT_COLOR_WHITE + " " + column + " ");
+        }
+        System.out.println(RESET_BG_COLOR);
+    }
+
+
+    private static String getPieceSymbol(ChessPiece piece) {
+        if (piece == null) return EMPTY; // Use the empty space symbol
+        switch (piece.getPieceType()) {
+            case PAWN:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN;
+            case ROOK:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK;
+            case KNIGHT:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case BISHOP:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_BISHOP : BLACK_BISHOP;
+            case QUEEN:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_QUEEN : BLACK_QUEEN;
+            case KING:
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KING : BLACK_KING;
+            default:
+                return EMPTY; // Fallback for any unexpected cases
+        }
     }
 
     public static void main(String[] args) {
-        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        String[][] board = setupInitialBoard(); // Assume setupInitialBoard method initializes the chess board
-        printBoard(out, board);
-    }
+        // Mock a ChessBoard object for demonstration
+        ChessBoard chessBoard = new ChessBoard();
+        chessBoard.resetBoard();
 
-    // Setup the initial board with pieces, similar to previous implementations
-    private static String[][] setupInitialBoard() {
-        String[][] board = new String[8][8];
+        System.out.println("Chess board from White's perspective:");
+        printChessBoard(chessBoard, true);
 
-        // Setup black pieces
-        board[0][0] = EscapeSequences.BLACK_ROOK;
-        board[0][1] = EscapeSequences.BLACK_KNIGHT;
-        board[0][2] = EscapeSequences.BLACK_BISHOP;
-        board[0][3] = EscapeSequences.BLACK_QUEEN;
-        board[0][4] = EscapeSequences.BLACK_KING;
-        board[0][5] = EscapeSequences.BLACK_BISHOP;
-        board[0][6] = EscapeSequences.BLACK_KNIGHT;
-        board[0][7] = EscapeSequences.BLACK_ROOK;
-        for (int i = 0; i < 8; i++) {
-            board[1][i] = EscapeSequences.BLACK_PAWN;
-        }
-
-        // Setup empty squares
-        for (int row = 2; row < 6; row++) {
-            for (int col = 0; col < 8; col++) {
-                board[row][col] = EscapeSequences.EMPTY;
-            }
-        }
-
-        // Setup white pieces
-        for (int i = 0; i < 8; i++) {
-            board[6][i] = EscapeSequences.WHITE_PAWN;
-        }
-        board[7][0] = EscapeSequences.WHITE_ROOK;
-        board[7][1] = EscapeSequences.WHITE_KNIGHT;
-        board[7][2] = EscapeSequences.WHITE_BISHOP;
-        board[7][3] = EscapeSequences.WHITE_QUEEN;
-        board[7][4] = EscapeSequences.WHITE_KING;
-        board[7][5] = EscapeSequences.WHITE_BISHOP;
-        board[7][6] = EscapeSequences.WHITE_KNIGHT;
-        board[7][7] = EscapeSequences.WHITE_ROOK;
-
-        return board;
+        System.out.println("\nChess board from Black's perspective:");
+        printChessBoard(chessBoard, false);
     }
 }
-

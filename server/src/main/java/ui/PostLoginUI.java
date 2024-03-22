@@ -3,6 +3,7 @@ package ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import chess.ChessBoard;
 
 public class PostLoginUI {
     private final ServerFacade facade;
@@ -101,15 +102,27 @@ public class PostLoginUI {
         try {
             facade.joinGame(authToken, gameId, playerColor);
             System.out.println("Joined game " + gameId + " as " + playerColor);
-            ChessBoardDisplay.printInitialChessBoard();
+            ChessBoard chessBoard = new ChessBoard();
+            chessBoard.resetBoard(); // Or however you initialize your chess board
+
+            System.out.println("Joined game as WHITE (for example)");
+            ChessBoardDisplay.printChessBoard(chessBoard, true); // true for white's perspective
         } catch (Exception e) {
             System.out.println("Failed to join game: " + e.getMessage());
         }
+
+
     }
 
     private void observeGame() throws IOException {
         System.out.println("Observing game: (Full logic to be implemented in phase 6 with websockets)");
-        ChessBoardDisplay.printInitialChessBoard();
+        ChessBoard chessBoard = new ChessBoard();
+        chessBoard.resetBoard(); // Initialize your chess board
+
+        // Here you can decide or let the user decide which perspective to observe from
+        System.out.println("Observing game from BLACK's perspective:");
+        ChessBoardDisplay.printChessBoard(chessBoard, false); // false for black's perspective
+
     }
 
     private void logout() throws IOException, InterruptedException {
