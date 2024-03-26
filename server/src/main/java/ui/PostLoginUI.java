@@ -16,7 +16,7 @@ public class PostLoginUI {
         this.reader = new BufferedReader(new InputStreamReader(System.in));
     }
 
-    public void run() throws IOException, InterruptedException {
+    public boolean run() throws IOException, InterruptedException {
         System.out.println("Welcome to the game lobby! Type 'help' to see available commands.");
         while (true) {
             String input = reader.readLine().trim();
@@ -38,7 +38,7 @@ public class PostLoginUI {
                     break;
                 case "logout":
                     logout();
-                    return; // Exit the method to return to the pre-login UI
+                    return true; // Return true to indicate continuing the application
                 default:
                     System.out.println("Unknown command. Type 'help' for a list of commands.");
             }
