@@ -124,7 +124,7 @@ public class ChessBoardDisplay {
     }
 
     public static void main(String[] args) {
-        // Mock a ChessBoard object for demonstration
+
         ChessBoard chessBoard = new ChessBoard();
         chessBoard.resetBoard();
 

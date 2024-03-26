@@ -30,14 +30,12 @@ public class GameDAO implements IGameDAO {
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
                     Integer gameId = rs.getInt(1);
-                    System.out.println("Game created with ID: " + gameId); // Debug statement
                     return gameId;
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to create game: " + e.getMessage());
         }
-        System.out.println("Failed to create game, no ID returned."); // Debug statement
         return null;
     }
 

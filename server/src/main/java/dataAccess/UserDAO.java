@@ -1,15 +1,17 @@
 package dataAccess;
 
-import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import model.UserData;
 
 import java.sql.*;
 
 public class UserDAO implements IUserDAO {
     private Connection connection;
+    private BCryptPasswordEncoder passwordEncoder;
 
     public UserDAO(Connection connection) {
         this.connection = connection;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
@@ -31,7 +33,7 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public void createUser(String username, String password, String email) throws DataAccessException {
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        String hashedPassword = passwordEncoder.encode(password);
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -54,7 +56,7 @@ public class UserDAO implements IUserDAO {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 String hashedPassword = rs.getString("password");
-                return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
+                return passwordEncoder.matches(providedClearTextPassword, hashedPassword);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to verify user: " + e.getMessage());
