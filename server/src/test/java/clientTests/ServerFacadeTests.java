@@ -1,14 +1,11 @@
 package clientTests;
 
 import org.junit.jupiter.api.*;
-import static org.mockito.Mockito.*;
 import server.Server;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import ui.*;
 import dataAccess.*;
 import model.*;
-import org.junit.jupiter.api.*;
 import java.util.List;
 
 
