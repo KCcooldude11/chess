@@ -103,15 +103,17 @@ public class PostLoginUI {
             facade.joinGame(authToken, gameId, playerColor);
             System.out.println("Joined game " + gameId + " as " + playerColor);
             ChessBoard chessBoard = new ChessBoard();
-            chessBoard.resetBoard(); // Or however you initialize your chess board
+            chessBoard.resetBoard(); // Initialize your chess board
 
-            System.out.println("Joined game as WHITE (for example)");
-            ChessBoardDisplay.printChessBoard(chessBoard, true); // true for white's perspective
+            // Always show the chessboard from both perspectives when joining or observing a game
+            System.out.println("\nChessboard from WHITE's perspective:");
+            ChessBoardDisplay.printChessBoard(chessBoard, false); // true indicates white's perspective
+
+            System.out.println("\nChessboard from BLACK's perspective:");
+            ChessBoardDisplay.printChessBoard(chessBoard, true); // false indicates black's perspective
         } catch (Exception e) {
             System.out.println("Failed to join game: " + e.getMessage());
         }
-
-
     }
 
     private void observeGame() throws IOException {
@@ -119,10 +121,16 @@ public class PostLoginUI {
         ChessBoard chessBoard = new ChessBoard();
         chessBoard.resetBoard(); // Initialize your chess board
 
-        // Here you can decide or let the user decide which perspective to observe from
-        System.out.println("Observing game from BLACK's perspective:");
-        ChessBoardDisplay.printChessBoard(chessBoard, false); // false for black's perspective
+        // Print the board from WHITE's perspective (white pieces at the bottom)
+        System.out.println("Chess board from WHITE's perspective:");
+        ChessBoardDisplay.printChessBoard(chessBoard, false);
 
+        // Adding some space between the two boards for clarity
+        System.out.println("\n");
+
+        // Print the board from BLACK's perspective (black pieces at the bottom)
+        System.out.println("Chess board from BLACK's perspective:");
+        ChessBoardDisplay.printChessBoard(chessBoard, true);
     }
 
     private void logout() throws IOException, InterruptedException {
