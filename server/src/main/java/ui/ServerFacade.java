@@ -126,18 +126,19 @@ public class ServerFacade {
             throw new IOException("Failed to join game: " + response.body());
         }
     }
-//    public void observeGame(String authToken, int gameId) throws IOException, InterruptedException {
-//        // Assuming the server expects a simple GET request with the game ID in the query string or path
-//        HttpRequest request = HttpRequest.newBuilder()
-//                .uri(URI.create(serverUrl + "/game" + gameId)) // Example URL structure
-//                .header("Authorization", authToken)
-//                .GET()
-//                .build();
-//
-//        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-//
-//        if (response.statusCode() != 200) {
-//            throw new IOException("Failed to observe game: " + response.body());
-//        }
-//    }
+    public GameData observeGame(String authToken, int gameId) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/observe/" + gameId))
+                .header("Authorization", authToken) // Include the Authorization header if needed
+                .GET()
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return new Gson().fromJson(response.body(), GameData.class);
+        } else {
+            throw new IOException("Failed to observe game: " + response.body());
+        }
+    }
 }

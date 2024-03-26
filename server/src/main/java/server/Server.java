@@ -8,6 +8,8 @@ import model.request.*;
 import model.end.ErrorMessage;
 import java.util.Objects;
 import com.google.gson.Gson;
+import model.*;
+import chess.ChessGame;
 
 public class Server {
     private IUserDAO userDAO;
@@ -47,6 +49,18 @@ public class Server {
         // DELETE requests
         Spark.delete("/session", this::logoutHandler);
         Spark.delete("/db", this::deleteHandler);
+        Spark.get("/observe/:gameId", (request, response) -> {
+            int gameId = Integer.parseInt(request.params(":gameId"));
+            // Example check for game existence. Implement according to your application's logic.
+            GameData gameData = gameDAO.getGame(gameId); // Assuming this method returns null if the game doesn't exist
+            if (gameData == null) {
+                response.status(404); // Not Found
+                return new Gson().toJson(new ErrorMessage("Game not found"));
+            }
+            // If the game exists, return the game data
+            response.type("application/json");
+            return new Gson().toJson(gameData);
+        });
     }
     private Object registerHandler(Request request, Response response) {
         UserService userService = new UserService(userDAO, authDAO);

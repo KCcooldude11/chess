@@ -7,6 +7,7 @@ import ui.*;
 import dataAccess.*;
 import model.*;
 import java.util.List;
+import java.net.http.*;
 
 
 public class ServerFacadeTests {
@@ -199,5 +200,40 @@ public class ServerFacadeTests {
         Exception exception = Assertions.assertThrows(IOException.class, () -> {
             facade.listGames(invalidAuthToken);
         });
+    }
+    @Test
+    void observeGameSuccess() throws Exception {
+        // Setup prerequisites for observing a game, such as creating a user, logging in, and creating a game.
+        String username = "testUser" + System.currentTimeMillis();
+        String password = "testPass";
+        String email = "testEmail" + System.currentTimeMillis() + "@example.com";
+        facade.register(username, password, email);
+        AuthData authData = facade.login(username, password);
+        Integer gameId = facade.createGame("Test Game", authData.getAuthToken());
+
+        // Attempt to observe the game
+        GameData observedGame = facade.observeGame(authData.getAuthToken(), gameId);
+
+        // Asserts
+        Assertions.assertNotNull(observedGame);
+        Assertions.assertEquals(gameId, observedGame.getGameID());
+        // Add more assertions as necessary to validate the observed game data
+    }
+    @Test
+    void observeGameFailureWithNonexistentGame() throws IOException, InterruptedException {
+        // Assuming an auth token is required even for observing a game
+        String username = "observerUser" + System.currentTimeMillis();
+        String password = "observerPass";
+        facade.register(username, password, "observerEmail" + System.currentTimeMillis() + "@example.com");
+        AuthData authData = facade.login(username, password);
+
+        // Use an arbitrary game ID that is unlikely to exist
+        int nonexistentGameId = 999999;
+
+        // Attempt to observe the non-existent game, expecting an IOException to be thrown
+        Exception exception = Assertions.assertThrows(IOException.class, () -> facade.observeGame(authData.getAuthToken(), nonexistentGameId));
+
+        // Optionally, you can further assert on the exception message
+        Assertions.assertTrue(exception.getMessage().contains("Failed to observe game"));
     }
 }
